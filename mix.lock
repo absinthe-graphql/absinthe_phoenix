@@ -1,0 +1,4 @@
+%{"absinthe": {:hex, :absinthe, "1.1.6"},
+  "phoenix": {:hex, :phoenix, "1.1.4"},
+  "plug": {:hex, :plug, "1.1.4"},
+  "poison": {:hex, :poison, "2.1.0"}}
