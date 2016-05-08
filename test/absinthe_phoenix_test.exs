@@ -9,14 +9,30 @@ defmodule Absinthe.PhoenixTest do
     :ok
   end
 
-  test "It works" do
+  test "basic test" do
     conn =
       conn()
       |> put_req_header("content-type", "application/json")
-      |> get("/", %{foo: "bar"})
+      |> get("/", %{name: "bar"})
 
-    params = conn.assigns.params
+    assert %{name: "bar"} == conn.assigns.params
+  end
 
-    assert %{foo: "bar"} == params
+  test "it ignores extra values" do
+    conn =
+      conn()
+      |> put_req_header("content-type", "application/json")
+      |> get("/", %{name: "bar", buz: "buzz"})
+
+    assert %{name: "bar"} == conn.assigns.params
+  end
+
+  test "it errors when non null values are not sent" do
+    conn =
+      conn()
+      |> put_req_header("content-type", "application/json")
+      |> get("/", %{})
+
+    assert 400 = conn.status
   end
 end
