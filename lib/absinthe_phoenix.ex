@@ -12,7 +12,7 @@ defmodule Absinthe.Phoenix do
 
   def init(opts), do: opts
 
-  def call(conn, opts) do
+  def call(conn, _opts) do
     with {:ok, controller} <- Map.fetch(conn.private, :phoenix_controller),
          {:ok, input_type_name} <- Map.fetch(conn.private, :phoenix_action),
          {:ok, input_type} <- fetch_input_type(controller, input_type_name) do
@@ -35,7 +35,7 @@ defmodule Absinthe.Phoenix do
         {:ok, exec.variables.processed["input"].value}
 
       {:error, exec} ->
-        {:error, exec.errors}
+        {:error, rename exec.errors}
     end
   end
 

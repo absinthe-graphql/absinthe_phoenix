@@ -3,8 +3,8 @@ defmodule Absinthe.Phoenix.TestController do
   use Absinthe.Phoenix
 
   input_object :index do
+    field :organization_id, list_of(:id)
     field :name, non_null(:string)
-    field :age, :integer
   end
 
   def index(conn, params) do
