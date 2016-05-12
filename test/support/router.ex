@@ -7,5 +7,6 @@ defmodule Absinthe.Phoenix.TestRouter do
 
   pipe_through :api
 
+  get "/:id", Absinthe.Phoenix.TestController, :get
   get "/", Absinthe.Phoenix.TestController, :index
 end

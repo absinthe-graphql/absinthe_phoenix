@@ -24,6 +24,11 @@ Example ordinary phoenix parameters that meet this criterion might look like
 }
 ```
 
+We're gonna create an `input_object` with the same name as the controller action.
+The fields on this input object are the parameter fields you want to specify
+for that action. Input objects can be nested arbitrarily deep. Input objects are
+not permitted to form cycles.
+
 ```elixir
 use Absinthe.Phoenix
 
@@ -69,6 +74,29 @@ we accepted ahead of time, we can safely use atom keys.
 
 We are also guaranteed that all parameters specified as `non_null` will be present.
 If they are not, an error will be sent back to the user.
+
+## Sharing types
+
+Many types (like `:time`) we probably want to use in many different controllers.
+
+Create the following file in your web directory:
+```elixir
+defmodule MyApp.Types do
+  use Absinthe.Schema.Notation
+
+  scalar :time do
+    parse &Calendar.DateTime.Parse.rfc3339_utc/1
+    serialize &Calendar.DateTime.Format.rfc3339/1
+  ends
+end
+```
+
+Now any controller where you want to use these types simply add:
+```elixir
+import_types MyApp.Types
+```
+
+Now you can use any types defined in `MyApp.Types` inside your controller.
 
 ## Installation
 

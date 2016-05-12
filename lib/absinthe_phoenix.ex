@@ -20,6 +20,7 @@ defmodule Absinthe.Phoenix do
     end
     |> case do
       {:ok, params} -> %{conn | params: params}
+      :no_type -> conn
       {:error, _} ->
         conn
         |> send_resp(400, "")
@@ -56,7 +57,7 @@ defmodule Absinthe.Phoenix do
 
   defp fetch_input_type(schema, name) do
     case Absinthe.Schema.lookup_type(schema, name) do
-      nil -> :error
+      nil -> :no_type
       type -> {:ok, type}
     end
   end

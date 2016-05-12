@@ -8,7 +8,10 @@ defmodule Absinthe.Phoenix.TestController do
   end
 
   def index(conn, params) do
-    conn
-    |> assign(:params, params)
+    conn |> assign(:params, params)
+  end
+
+  def get(conn, params) do
+    conn |> assign(:params, params)
   end
 end

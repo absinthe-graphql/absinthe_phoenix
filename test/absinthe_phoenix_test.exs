@@ -35,4 +35,13 @@ defmodule Absinthe.PhoenixTest do
 
     assert 400 = conn.status
   end
+
+  test "it doesn't blow up on actions without specified inputs" do
+    conn =
+      conn()
+      |> put_req_header("content-type", "application/json")
+      |> get("/1", %{})
+
+    assert %{"id" => "1"} == conn.assigns.params
+  end
 end
