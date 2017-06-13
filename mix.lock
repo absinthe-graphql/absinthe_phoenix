@@ -1,4 +1,6 @@
-%{"absinthe": {:hex, :absinthe, "1.1.6"},
-  "phoenix": {:hex, :phoenix, "1.1.4"},
-  "plug": {:hex, :plug, "1.1.4"},
-  "poison": {:hex, :poison, "2.1.0"}}
+%{"absinthe": {:hex, :absinthe, "1.3.1", "3e4f4c780230db74ee198a7cb105c06ca61dd745a75125115dcb65310865b925", [:mix], [], "hexpm"},
+  "mime": {:hex, :mime, "1.1.0", "01c1d6f4083d8aa5c7b8c246ade95139620ef8effb009edde934e0ec3b28090a", [:mix], [], "hexpm"},
+  "phoenix": {:hex, :phoenix, "1.2.4", "4172479b5e21806a5e4175b54820c239e0d4effb0b07912e631aa31213a05bae", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, repo: "hexpm", optional: true]}, {:phoenix_pubsub, "~> 1.0", [hex: :phoenix_pubsub, repo: "hexpm", optional: false]}, {:plug, "~> 1.4 or ~> 1.3.3 or ~> 1.2.4 or ~> 1.1.8 or ~> 1.0.5", [hex: :plug, repo: "hexpm", optional: false]}, {:poison, "~> 1.5 or ~> 2.0", [hex: :poison, repo: "hexpm", optional: false]}], "hexpm"},
+  "phoenix_pubsub": {:hex, :phoenix_pubsub, "1.0.1", "c10ddf6237007c804bf2b8f3c4d5b99009b42eca3a0dfac04ea2d8001186056a", [:mix], [], "hexpm"},
+  "plug": {:hex, :plug, "1.3.5", "7503bfcd7091df2a9761ef8cecea666d1f2cc454cbbaf0afa0b6e259203b7031", [:mix], [{:cowboy, "~> 1.0.1 or ~> 1.1", [hex: :cowboy, repo: "hexpm", optional: true]}, {:mime, "~> 1.0", [hex: :mime, repo: "hexpm", optional: false]}], "hexpm"},
+  "poison": {:hex, :poison, "2.2.0", "4763b69a8a77bd77d26f477d196428b741261a761257ff1cf92753a0d4d24a63", [:mix], [], "hexpm"}}
