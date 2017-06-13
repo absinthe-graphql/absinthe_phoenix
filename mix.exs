@@ -21,7 +21,7 @@ defmodule Absinthe.Phoenix.Mixfile do
   defp deps do
     [
       {:absinthe, "~> 1.3"},
-      {:phoenix, "~> 1.0"},
+      {:phoenix, "~> 1.0 or ~> 1.3.0-rc"},
       {:poison, "~> 2.0"},
     ]
   end

@@ -2,6 +2,12 @@ defmodule Absinthe.Phoenix.Channel do
   use Phoenix.Channel
   require Logger
 
+  defmacro __using__(_) do
+    quote do
+      channel "__absinthe__:*", unquote(__MODULE__)
+    end
+  end
+
   @doc false
   def join("__absinthe__:control", _, socket) do
     {:ok, socket}
@@ -14,9 +20,9 @@ defmodule Absinthe.Phoenix.Channel do
 
     Absinthe.Logger.log_run(:debug, {
       query,
-      config,
+      config.schema_mod,
       [],
-      config,
+      config.opts,
     })
 
     handle_doc(query, config, socket)
@@ -58,7 +64,7 @@ defmodule Absinthe.Phoenix.Channel do
 
     pid = self()
     for field_key <- field_keys(doc) do
-      Absinthe.Subscriptions.Manager.subscribe(GitHunt.Web.Endpoint, field_key, topic, doc, pid)
+      Absinthe.Subscriptions.Manager.subscribe(socket.endpoint, field_key, topic, doc, pid)
     end
 
     {:reply, {:ok, %{ref: topic}}, socket}
@@ -74,7 +80,13 @@ defmodule Absinthe.Phoenix.Channel do
     |> Map.fetch!(:selections)
     |> Enum.map(fn %{schema_node: schema_node, argument_data: argument_data} ->
       name = schema_node.__reference__.identifier
-      key = schema_node.topic.(argument_data)
+
+      key = case schema_node.topic do
+        fun when is_function(fun, 1) ->
+          schema_node.topic.(argument_data)
+        nil ->
+          to_string(name)
+      end
 
       {name, key}
     end)
