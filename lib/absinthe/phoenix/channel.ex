@@ -10,6 +10,17 @@ defmodule Absinthe.Phoenix.Channel do
 
   @doc false
   def join("__absinthe__:control", _, socket) do
+    defaults_opts = [
+      jump_phases: false
+    ]
+    absinthe_config =
+      socket.assigns[:absinthe]
+      |> Map.new
+      |> Map.update(:opts, defaults_opts, fn opts ->
+        Keyword.merge(opts, defaults_opts)
+      end)
+
+    socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
   end
 
@@ -101,14 +112,14 @@ defmodule Absinthe.Phoenix.Channel do
 
   @doc false
   def preparation_pipeline(config) do
-    config.schema_mod
+    config.schema
     |> Absinthe.Pipeline.for_document(config.opts)
     |> Absinthe.Pipeline.before(Absinthe.Phase.Document.Execution.Resolution)
   end
 
   @doc false
   def finalization_pipeline(config) do
-    config.schema_mod
+    config.schema
     |> Absinthe.Pipeline.for_document(config.opts)
     |> Absinthe.Pipeline.from(Absinthe.Phase.Document.Execution.Resolution)
   end
