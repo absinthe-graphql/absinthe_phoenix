@@ -13,6 +13,7 @@ defmodule Absinthe.Phoenix.Channel do
     defaults_opts = [
       jump_phases: false
     ]
+
     absinthe_config =
       socket.assigns[:absinthe]
       |> Map.new
@@ -31,7 +32,7 @@ defmodule Absinthe.Phoenix.Channel do
 
     Absinthe.Logger.log_run(:debug, {
       query,
-      config.schema_mod,
+      config.schema,
       [],
       config.opts,
     })
@@ -81,7 +82,7 @@ defmodule Absinthe.Phoenix.Channel do
     {:reply, {:ok, %{ref: topic}}, socket}
   end
   defp execute(_, doc, _query, config, socket) do
-    {:ok, result, _} = Absinthe.Pipeline.run(doc, finalization_pipeline(config))
+    {:ok, %{result: result}, _} = Absinthe.Pipeline.run(doc, finalization_pipeline(config))
     {:reply, {:ok, result}, socket}
   end
 
