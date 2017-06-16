@@ -41,8 +41,9 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   @doc false
-  def handle_info(%{event: event, payload: payload}, socket) do
-    push(socket, event, payload)
+  def handle_info(%{event: "subscription:data", payload: payload}, socket) do
+    %{subscription_id: id, result: result} = payload
+    push(socket, event, %{"subscriptionId" => id, "result" => result})
     {:noreply, socket}
   end
 
@@ -79,7 +80,7 @@ defmodule Absinthe.Phoenix.Channel do
       Absinthe.Subscriptions.Manager.subscribe(socket.endpoint, field_key, topic, doc, pid)
     end
 
-    {:reply, {:ok, %{ref: topic}}, socket}
+    {:reply, {:ok, %{subscriptionId: topic}}, socket}
   end
   defp execute(_, doc, _query, config, socket) do
     {:ok, %{result: result}, _} = Absinthe.Pipeline.run(doc, finalization_pipeline(config))
