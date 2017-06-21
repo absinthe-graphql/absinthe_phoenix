@@ -20,8 +20,10 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe, "~> 1.3"},
+      # {:absinthe, github: "absinthe-graphql/absinthe", branch: "subscriptions"},
+      {:absinthe, path: "../absinthe", override: true},
       {:phoenix, "~> 1.0 or ~> 1.3.0-rc"},
+      {:phoenix_pubsub, "~> 1.0 or ~> 1.3.0-rc"},
       {:poison, "~> 2.0"},
     ]
   end

@@ -69,4 +69,18 @@ defmodule Absinthe.PhoenixTest do
     expected = %{result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}}, subscription_id: subscription_ref}
     assert expected == push
   end
+
+  test "subscriptions that raise errors do not cause problems for mutations", %{socket: socket} do
+    ref = push socket, "doc", %{
+      "query" => "subscription {raises { contents }}"
+    }
+    assert_reply ref, :ok, %{ref: _subscription_ref}
+
+    ref = push socket, "doc", %{
+      "query" => "mutation {addComment(contents: \"raise\") { contents }}"
+    }
+    assert_reply ref, :ok, reply
+    expected = %{data: %{"addComment" => %{"contents" => "raise"}}}
+    assert expected == reply
+  end
 end

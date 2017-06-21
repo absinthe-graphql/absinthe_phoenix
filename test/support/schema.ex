@@ -34,13 +34,25 @@ defmodule Schema do
 
   subscription do
     field :comment_added, :comment do
-      topic fn _ ->
-        "*"
+      topic fn _args ->
+        ""
       end
 
       trigger :add_comment, topic: fn _comment ->
-        "*"
+        ""
       end
+    end
+
+    field :raises, :comment do
+      topic fn _ ->
+        "raise"
+      end
+
+      trigger :add_comment, topic: fn comment ->
+        comment.contents
+      end
+
+      resolve fn _, _ -> raise "boom" end
     end
   end
 end
