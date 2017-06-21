@@ -26,9 +26,11 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   @doc false
-  def handle_in("doc", %{"query" => query, "variables" => variables}, socket) do
+  def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
-    config = put_in(config.opts[:variables], variables)
+    config = put_in(config.opts[:variables], Map.get(payload, "variables", %{}))
+
+    query = Map.get(payload, "query", "")
 
     Absinthe.Logger.log_run(:debug, {
       query,
@@ -52,6 +54,8 @@ defmodule Absinthe.Phoenix.Channel do
     query
     |> prepare(config)
     |> case do
+      {:error, result} ->
+        {:reply, {:ok, result}, socket}
       {:ok, doc} ->
         doc
         |> classify
@@ -109,6 +113,15 @@ defmodule Absinthe.Phoenix.Channel do
     case Absinthe.Pipeline.run(query, preparation_pipeline(config)) do
       {:ok, blueprint, _} ->
         {:ok, blueprint}
+      {:error, bp, _} ->
+        # turn the errors into a result
+        error_pipeline =
+          config
+          |> finalization_pipeline
+          |> Enum.drop(1)
+
+        {_, %{result: result}, _} = Absinthe.Pipeline.run(bp, error_pipeline)
+        {:error, result}
     end
   end
 
