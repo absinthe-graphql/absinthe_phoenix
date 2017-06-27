@@ -15,7 +15,7 @@ Libraries you'll need:
 In your application supervisor add:
 
 ```elixir
-worker(Absinthe.Subscriptions.Manager, [MyApp.Web.Endpoint]),
+worker(Absinthe.Subscription.Manager, [MyApp.Web.Endpoint]),
 ```
 
 Where `MyApp.Web.Endpoint` is the name of your application's phoenix endpoint.

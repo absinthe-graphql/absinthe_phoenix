@@ -69,9 +69,9 @@ defmodule Absinthe.Phoenix.Channel do
 
   defp execute(:subscription, doc, query, config, socket) do
     hash = :erlang.phash2({query, config})
-    topic = "__absinthe__:#{hash}"
+    doc_id = "__absinthe__:doc:#{hash}"
 
-    socket.endpoint.subscribe(topic)
+    socket.endpoint.subscribe(doc_id)
 
     # # TODO: Use fast lane
     # :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
@@ -79,12 +79,12 @@ defmodule Absinthe.Phoenix.Channel do
     #   link: true,
     # ])
 
-    pid = self()
+
     for field_key <- field_keys(doc) do
-      Absinthe.Subscriptions.Manager.subscribe(socket.endpoint, field_key, topic, doc, pid)
+      Absinthe.Subscription.subscribe(socket.endpoint, field_key, doc_id, doc)
     end
 
-    {:reply, {:ok, %{subscriptionId: topic}}, socket}
+    {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
   defp execute(_, doc, _query, config, socket) do
     {:ok, %{result: result}, _} = Absinthe.Pipeline.run(doc, finalization_pipeline(config))

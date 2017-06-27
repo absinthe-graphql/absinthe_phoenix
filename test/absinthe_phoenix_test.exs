@@ -6,7 +6,7 @@ defmodule Absinthe.PhoenixTest do
     Absinthe.Test.prime(Schema)
 
     {:ok, _} = Absinthe.Phoenix.TestEndpoint.start_link
-    {:ok, _} = Absinthe.Subscriptions.Manager.start_link(Absinthe.Phoenix.TestEndpoint)
+    {:ok, _} = Absinthe.Subscription.start_link(Absinthe.Phoenix.TestEndpoint)
     :ok
   end
 
