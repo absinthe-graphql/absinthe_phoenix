@@ -73,12 +73,11 @@ defmodule Absinthe.Phoenix.Channel do
 
     socket.endpoint.subscribe(doc_id)
 
-    # # TODO: Use fast lane
-    # :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
+    # TODO: Use fast lane
+    # :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, doc_id, [
     #   fastlane: {socket.transport_pid, socket.serializer, []},
     #   link: true,
     # ])
-
 
     for field_key <- field_keys(doc) do
       Absinthe.Subscription.subscribe(socket.endpoint, field_key, doc_id, doc)
