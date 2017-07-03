@@ -15,10 +15,15 @@ Libraries you'll need:
 In your application supervisor add:
 
 ```elixir
-worker(Absinthe.Subscription.Manager, [MyApp.Web.Endpoint]),
+worker(Absinthe.Subscription, [MyApp.Web.Endpoint]),
 ```
 
 Where `MyApp.Web.Endpoint` is the name of your application's phoenix endpoint.
+
+In your `MyApp.Web.Endpoint` module add:
+```elixir
+use Absinthe.Phoenix.Endpoint
+```
 
 In your socket add:
 
@@ -97,18 +102,18 @@ subscription do
   field :comment_added, :comment do
     arg :repo_full_name, non_null(:string)
 
-    # The topic function is used to determine what topic a given subscription
-    # cares about based on its arguments.
-    topic fn args ->
-      args.repo_full_name
-    end
-
     # this tells Absinthe to run any subscriptions with this field every time
     # the :submit_comment mutation happens.
     # It also has a topic function used to find what subscriptions care about
     # this particular comment
     trigger :submit_comment, topic: fn comment ->
       comment.repository_name
+    end
+
+    # The topic function is used to determine what topic a given subscription
+    # cares about based on its arguments.
+    topic fn args ->
+      args.repo_full_name
     end
 
     resolve fn %{comment_added: comment}, _, _ ->

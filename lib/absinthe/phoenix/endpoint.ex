@@ -2,7 +2,12 @@ defmodule Absinthe.Phoenix.Endpoint do
   defmacro __using__(_) do
     quote do
       @behaviour Absinthe.Subscription.Pubsub
+      @before_compile unquote(__MODULE__)
+    end
+  end
 
+  defmacro __before_compile__(_) do
+    quote do
       def publish_mutation(topic, data) do
         Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, data)
       end
