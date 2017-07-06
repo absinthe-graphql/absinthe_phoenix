@@ -15,7 +15,7 @@ Libraries you'll need:
 In your application supervisor add:
 
 ```elixir
-worker(Absinthe.Subscription, [MyApp.Web.Endpoint]),
+supervisor(Absinthe.Subscription, [MyApp.Web.Endpoint]),
 ```
 
 Where `MyApp.Web.Endpoint` is the name of your application's phoenix endpoint.
@@ -61,30 +61,7 @@ That is all that's required for setup on the server.
 
 Minimal javascript (ES6)
 
-```javascript
-const socket = new Socket("ws://localhost:4000/socket", {});
-
-socket.connect();
-let chan = socket.channel('__absinthe__:control');
-
-chan
-  .join()
-  .receive("ok", resp => { console.log("Joined absinthe control socket", resp) })
-  .receive("error", resp => { console.log("Unable to join absinthe control socket", resp) });
-
-function subscribe(request, callback) {
-  # request should have a "query" field and a "variables" field.
-  chan.push("doc", request)
-    .receive("ok", (msg) => {console.log("subscription created", msg) })
-    .receive("error", (reasons) => console.log("subscription failed", reasons) )
-    .receive("timeout", () => console.log("Networking issue...") )
-
-  chan.on("subscription:data", msg => {
-    console.log(msg);
-    callback(msg.errors, msg.data);
-  })
-}
-```
+COMING SOON
 
 ### Schema
 

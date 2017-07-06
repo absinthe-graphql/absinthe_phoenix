@@ -8,18 +8,13 @@ defmodule Absinthe.Phoenix.Endpoint do
 
   defmacro __before_compile__(_) do
     quote do
-      def publish_mutation(topic, data) do
-        Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, data)
+      def publish_mutation(topic, subscribed_fields, mutation_result) do
+        Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, subscribed_fields, mutation_result)
       end
       def publish_subscription(topic, data) do
         Absinthe.Phoenix.Endpoint.publish_subscription(@otp_app, __MODULE__, topic, data)
       end
     end
-  end
-
-  @doc false
-  def publish_mutation(_otp_app, endpoint, topic, payload) do
-    endpoint.broadcast!(topic, "mutation", payload)
   end
 
   @doc false
@@ -38,6 +33,22 @@ defmodule Absinthe.Phoenix.Endpoint do
     pubsub
     |> Phoenix.PubSub.node_name()
     |> Phoenix.PubSub.direct_broadcast(pubsub, topic, broadcast)
+  end
+
+  @doc false
+  def publish_mutation(otp_app, endpoint, proxy_topic, subscribed_fields, mutation_result) do
+    pubsub = pubsub(otp_app, endpoint)
+
+    # we need to include the current node as part of the broadcast.
+    # This is because this broadcast will also be picked up by proxies within the
+    # current node, and they need to be able to ignore this message.
+    message = %{
+      node: node(),
+      subscribed_fields: subscribed_fields,
+      mutation_result: mutation_result,
+    }
+
+    Phoenix.PubSub.broadcast(pubsub, proxy_topic, message)
   end
 
   defp pubsub(otp_app, endpoint) do

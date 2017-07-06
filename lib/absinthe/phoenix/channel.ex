@@ -18,7 +18,11 @@ defmodule Absinthe.Phoenix.Channel do
       socket.assigns[:absinthe]
       |> Map.new
       |> Map.update(:opts, defaults_opts, fn opts ->
-        Keyword.merge(opts, defaults_opts)
+        opts
+        |> Keyword.merge(defaults_opts)
+        |> Keyword.update(:context, %{pubsub: socket.endpoint}, fn context ->
+          Map.put(context, :pubsub, socket.endpoint)
+        end)
       end)
 
     socket = socket |> assign(:absinthe, absinthe_config)
@@ -43,13 +47,6 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   @doc false
-  def handle_info(%{event: "subscription:data" = event, payload: payload}, socket) do
-    %{subscription_id: id, result: result} = payload
-    push(socket, event, %{"subscriptionId" => id, "result" => result})
-    {:noreply, socket}
-  end
-
-  @doc false
   def handle_doc(query, config, socket) do
     query
     |> prepare(config)
@@ -71,13 +68,10 @@ defmodule Absinthe.Phoenix.Channel do
     hash = :erlang.phash2({query, config})
     doc_id = "__absinthe__:doc:#{hash}"
 
-    socket.endpoint.subscribe(doc_id)
-
-    # TODO: Use fast lane
-    # :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, doc_id, [
-    #   fastlane: {socket.transport_pid, socket.serializer, []},
-    #   link: true,
-    # ])
+    :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, doc_id, [
+      fastlane: {socket.transport_pid, socket.serializer, []},
+      link: true,
+    ])
 
     for field_key <- field_keys(doc) do
       Absinthe.Subscription.subscribe(socket.endpoint, field_key, doc_id, doc)

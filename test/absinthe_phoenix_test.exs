@@ -12,7 +12,7 @@ defmodule Absinthe.PhoenixTest do
 
   setup do
     {:ok, _, socket} =
-      socket("asdf", absinthe: %{schema: Schema, opts: [context: %{__absinthe__: [pubsub: Absinthe.Phoenix.TestEndpoint]}]})
+      socket("asdf", absinthe: %{schema: Schema, opts: []})
       |> subscribe_and_join(Absinthe.Phoenix.Channel, "__absinthe__:control")
 
     {:ok, socket: socket}
@@ -55,7 +55,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "subscription {commentAdded { contents }}"
     }
-    assert_reply ref, :ok, %{ref: subscription_ref}
+    assert_reply ref, :ok, %{subscriptionId: subscription_ref}
 
     ref = push socket, "doc", %{
       "query" => "mutation {addComment(contents: \"hello world\") { contents }}"
@@ -66,7 +66,7 @@ defmodule Absinthe.PhoenixTest do
     assert expected == reply
 
     assert_push "subscription:data", push
-    expected = %{result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}}, subscription_id: subscription_ref}
+    expected = %{result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}}, subscriptionId: subscription_ref}
     assert expected == push
   end
 
@@ -74,7 +74,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "subscription {raises { contents }}"
     }
-    assert_reply ref, :ok, %{ref: _subscription_ref}
+    assert_reply ref, :ok, %{subscriptionId: _subscription_ref}
 
     ref = push socket, "doc", %{
       "query" => "mutation {addComment(contents: \"raise\") { contents }}"
