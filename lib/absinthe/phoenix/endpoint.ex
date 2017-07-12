@@ -8,8 +8,8 @@ defmodule Absinthe.Phoenix.Endpoint do
 
   defmacro __before_compile__(_) do
     quote do
-      def publish_mutation(topic, subscribed_fields, mutation_result) do
-        Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, subscribed_fields, mutation_result)
+      def publish_mutation(topic, mutation_result, subscribed_fields) do
+        Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, mutation_result, subscribed_fields)
       end
       def publish_subscription(topic, data) do
         Absinthe.Phoenix.Endpoint.publish_subscription(@otp_app, __MODULE__, topic, data)
@@ -36,7 +36,7 @@ defmodule Absinthe.Phoenix.Endpoint do
   end
 
   @doc false
-  def publish_mutation(otp_app, endpoint, proxy_topic, subscribed_fields, mutation_result) do
+  def publish_mutation(otp_app, endpoint, proxy_topic, mutation_result, subscribed_fields) do
     pubsub = pubsub(otp_app, endpoint)
 
     # we need to include the current node as part of the broadcast.

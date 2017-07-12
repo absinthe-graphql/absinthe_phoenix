@@ -57,13 +57,28 @@ Where `MyApp.Web.Schema` is the name of your Absinthe schema module.
 
 That is all that's required for setup on the server.
 
+### GraphiQL
+
+At this time only the simpler GraphiQL interface supports subscriptions. To use
+them, just add a `:socket` option to your graphiql config:
+
+```elixir
+forward "/graphiql", Absinthe.Plug.GraphiQL,
+  schema: JLR.Web.Schema,
+  socket: JLR.Web.UserSocket,
+  interface: :simple
+```
+
 ### Javascript
 
-Minimal javascript (ES6)
+See: https://www.npmjs.com/package/absinthe-phoenix
 
-COMING SOON
+Specific integrations Apollo / Relay are coming.
 
 ### Schema
+
+Example schema that lets you use subscriptions to get notified when a comment
+is submitted to a github repo.
 
 ```elixir
 mutation do
@@ -79,18 +94,28 @@ subscription do
   field :comment_added, :comment do
     arg :repo_full_name, non_null(:string)
 
+    # The topic function is used to determine what topic a given subscription
+    # cares about based on its arguments. You can think of it as a way to tell the
+    # difference between
+    # subscription {
+    #   commentAdded(repoFullName: "absinthe-graphql/absinthe") { content }
+    # }
+    #
+    # and
+    #
+    # subscription {
+    #   commentAdded(repoFullName: "elixir-lang/elixir") { content }
+    # }
+    topic fn args ->
+      args.repo_full_name
+    end
+
     # this tells Absinthe to run any subscriptions with this field every time
     # the :submit_comment mutation happens.
     # It also has a topic function used to find what subscriptions care about
     # this particular comment
     trigger :submit_comment, topic: fn comment ->
       comment.repository_name
-    end
-
-    # The topic function is used to determine what topic a given subscription
-    # cares about based on its arguments.
-    topic fn args ->
-      args.repo_full_name
     end
 
     resolve fn %{comment_added: comment}, _, _ ->
