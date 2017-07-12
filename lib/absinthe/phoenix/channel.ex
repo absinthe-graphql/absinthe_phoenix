@@ -46,6 +46,11 @@ defmodule Absinthe.Phoenix.Channel do
     handle_doc(query, config, socket)
   end
 
+  def handle_in("unsubscribe", %{subscriptionId: sub_id}, socket) do
+    # TODO: blocked by Absinthe core.
+    {:reply, :ok, socket}
+  end
+
   @doc false
   def handle_doc(query, config, socket) do
     query
