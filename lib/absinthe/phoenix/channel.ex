@@ -2,12 +2,6 @@ defmodule Absinthe.Phoenix.Channel do
   use Phoenix.Channel
   require Logger
 
-  defmacro __using__(_) do
-    quote do
-      channel "__absinthe__:*", unquote(__MODULE__)
-    end
-  end
-
   @doc false
   def join("__absinthe__:control", _, socket) do
     defaults_opts = [
