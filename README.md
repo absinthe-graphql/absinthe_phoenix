@@ -28,7 +28,7 @@ use Absinthe.Phoenix.Endpoint
 In your socket add:
 
 ```elixir
-use Absinthe.Phoenix.Channel
+use Absinthe.Phoenix.Socket
 ```
 
 You also need to configure the schema by adding it to the socket assigns. Here
@@ -37,16 +37,12 @@ is an example socket:
 ```elixir
 defmodule GitHunt.Web.UserSocket do
   use Phoenix.Socket
-  use Absinthe.Phoenix.Channel
+  use Absinthe.Phoenix.Socket
 
   transport :websocket, Phoenix.Transports.WebSocket
 
   def connect(_params, socket) do
-    socket = socket |> assign(:absinthe, %{
-      schema: MyApp.Web.Schema,
-    })
-
-    {:ok, socket}
+    {:ok, assign(socket, :absinthe, %{schema: MyApp.Web.Schema})}
   end
 
   def id(_socket), do: nil
