@@ -46,8 +46,8 @@ defmodule Absinthe.Phoenix.Channel do
     handle_doc(query, config, socket)
   end
 
-  def handle_in("unsubscribe", %{subscriptionId: doc_id}, socket) do
-    Absinthe.Subscription.unsubscribe(doc_id)
+  def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
+    Absinthe.Subscription.unsubscribe(socket.endpoint, doc_id)
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
 
