@@ -12,7 +12,8 @@ Libraries you'll need:
 {:absinthe_phoenix, github: "absinthe-graphql/absinthe_phoenix", branch: "subscriptions"},
 ```
 
-In your application supervisor add:
+In your application supervisor add this line AFTER your existing endpoint supervision
+line:
 
 ```elixir
 supervisor(Absinthe.Subscription, [MyApp.Web.Endpoint]),
