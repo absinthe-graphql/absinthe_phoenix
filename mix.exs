@@ -3,7 +3,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   def project do
     [app: :absinthe_phoenix,
-     version: "0.1.0",
+     version: "1.4.0-beta.1",
      elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
@@ -20,8 +20,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      # {:absinthe, github: "absinthe-graphql/absinthe", branch: "subscriptions"},
-      {:absinthe, path: "../absinthe", override: true},
+      {:absinthe, "~> 1.4.0-beta.1"},
       {:phoenix, "~> 1.0 or ~> 1.3.0-rc"},
       {:phoenix_pubsub, "~> 1.0 or ~> 1.3.0-rc"},
       {:poison, "~> 2.0"},
