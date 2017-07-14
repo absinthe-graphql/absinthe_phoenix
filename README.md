@@ -77,6 +77,9 @@ Specific integrations Apollo / Relay are coming.
 Example schema that lets you use subscriptions to get notified when a comment
 is submitted to a github repo.
 
+See https://hexdocs.pm/absinthe/1.4.0-beta.1/Absinthe.Schema.html#subscription/2
+for more details on setting up subscriptions in your schema.
+
 ```elixir
 mutation do
   field :submit_comment, :comment do
