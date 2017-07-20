@@ -3,6 +3,15 @@ defmodule Absinthe.Phoenix.Channel do
   require Logger
 
   @doc false
+  def __using__(_) do
+    raise """
+    ----------------------------------------------
+    You should now `use Absinthe.Phoenix.Socket`
+    ----------------------------------------------
+    """
+  end
+
+  @doc false
   def join("__absinthe__:control", _, socket) do
     defaults_opts = [
       jump_phases: false
