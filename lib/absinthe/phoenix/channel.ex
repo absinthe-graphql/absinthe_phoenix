@@ -33,6 +33,9 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   @doc false
+  def join("__absinthe__:doc:" <> _, _, socket), do: {:ok, socket}
+
+  @doc false
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
     config = put_in(config.opts[:variables], Map.get(payload, "variables", %{}))
