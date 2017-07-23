@@ -66,11 +66,12 @@ forward "/graphiql", Absinthe.Plug.GraphiQL,
   interface: :simple
 ```
 
-### Javascript
+### Javascript clients
 
-See: https://www.npmjs.com/package/absinthe-phoenix
+- [absinthe-phoenix-js](https://www.npmjs.com/package/absinthe-phoenix)
+- [apollo-phoenix-websocket](https://github.com/vic/apollo-phoenix-websocket)
 
-Specific integrations Apollo / Relay are coming.
+Specific integrations with Relay are coming.
 
 ### Schema
 
