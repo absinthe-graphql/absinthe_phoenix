@@ -19,6 +19,15 @@ defmodule Schema do
         {:ok, users}
       end
     end
+
+    field :viewer, :user do
+      resolve fn
+        _, _, %{context: %{"authorization" => "jwt_token"}} ->
+          {:ok, %{name: "Jane", age: 25}}
+        _, _, _ ->
+          {:error, :no_current_session}
+      end
+    end
   end
 
   mutation do

@@ -29,6 +29,18 @@ defmodule Absinthe.PhoenixTest do
     }
   end
 
+  test "can provide execution context (ie for authorization)", %{socket: socket} do
+    ref = push socket, "doc", %{
+      "query" => "{viewer { name }}",
+      "context" => %{"authorization" => "jwt_token"}
+    }
+
+    assert_reply ref, :ok, reply
+    assert reply == %{
+      data: %{"viewer" => %{"name" => "Jane"}}
+    }
+  end
+
   test "basic query works with errors", %{socket: socket} do
     ref = push socket, "doc", %{
       "query" => "{users { errorField }}"
