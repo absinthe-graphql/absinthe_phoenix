@@ -50,6 +50,7 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
+    Phoenix.PubSub.unsubscribe(socket.pubsub_server, doc_id)
     Absinthe.Subscription.unsubscribe(socket.endpoint, doc_id)
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
