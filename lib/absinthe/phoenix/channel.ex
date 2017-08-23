@@ -36,6 +36,7 @@ defmodule Absinthe.Phoenix.Channel do
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
     config = put_in(config.opts[:variables], Map.get(payload, "variables", %{}))
+    config = put_in(config.opts[:context], Map.get(payload, "context", %{}))
 
     query = Map.get(payload, "query", "")
 
