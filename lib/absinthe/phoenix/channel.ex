@@ -13,18 +13,17 @@ defmodule Absinthe.Phoenix.Channel do
 
   @doc false
   def join("__absinthe__:control", _, socket) do
-    defaults_opts = []
 
-    absinthe_config =
-      socket.assigns[:absinthe]
-      |> Map.new
-      |> Map.update(:opts, defaults_opts, fn opts ->
-        opts
-        |> Keyword.merge(defaults_opts)
-        |> Keyword.update(:context, %{pubsub: socket.endpoint}, fn context ->
-          Map.put(context, :pubsub, socket.endpoint)
-        end)
+    absinthe_config = socket.assigns[:absinthe]
+
+    opts =
+      absinthe_config
+      |> Map.get(:opts, [])
+      |> Keyword.update(:context, %{pubsub: socket.endpoint}, fn context ->
+        Map.put(context, :pubsub, socket.endpoint)
       end)
+
+    absinthe_config = put_in(absinthe_config[:opts], opts)
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -33,7 +32,10 @@ defmodule Absinthe.Phoenix.Channel do
   @doc false
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
-    config = put_in(config.opts[:variables], Map.get(payload, "variables", %{}))
+
+    opts =
+      config.opts
+      |> Keyword.put(:variables, Map.get(payload, "variables", %{}))
 
     query = Map.get(payload, "query", "")
 
@@ -41,10 +43,10 @@ defmodule Absinthe.Phoenix.Channel do
       query,
       config.schema,
       [],
-      config.opts,
+      opts,
     })
 
-    result = Absinthe.run(query, config.schema, config.opts)
+    result = Absinthe.run(query, config.schema, opts)
 
     reply = with {:ok, %{"subscribed" => topic}} <- result do
       :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
