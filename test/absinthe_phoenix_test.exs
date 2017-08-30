@@ -58,7 +58,8 @@ defmodule Absinthe.PhoenixTest do
     assert_reply ref, :ok, %{subscriptionId: subscription_ref}
 
     ref = push socket, "doc", %{
-      "query" => "mutation {addComment(contents: \"hello world\") { contents }}"
+      "query" => "mutation ($contents: String!) {addComment(contents: $contents) { contents }}",
+      "variables" => %{"contents" => "hello world"},
     }
     assert_reply ref, :ok, reply
 

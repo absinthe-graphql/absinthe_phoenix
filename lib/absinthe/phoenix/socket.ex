@@ -11,8 +11,12 @@ defmodule Absinthe.Phoenix.Socket do
 
         transport :websocket, Phoenix.Transports.WebSocket
 
-        def connect(_params, socket) do
-          {:ok, assign(socket, :absinthe, %{schema: MyApp.Web.Schema})}
+        def connect(params, socket) do
+          absinthe_config = %{
+            schema: MyApp.Web.Schema,
+            context: %{current_user: find_current_user(params)}
+          }
+          {:ok, assign(socket, :absinthe, absinthe_config)}
         end
 
         def id(_socket), do: nil
