@@ -8,8 +8,8 @@ while they're in beta.
 Libraries you'll need:
 
 ```elixir
-{:absinthe, github: "absinthe-graphql/absinthe", branch: "subscriptions"},
-{:absinthe_phoenix, github: "absinthe-graphql/absinthe_phoenix", branch: "subscriptions"},
+{:absinthe, github: "absinthe-graphql/absinthe"},
+{:absinthe_phoenix, github: "absinthe-graphql/absinthe_phoenix"},
 ```
 
 In your application supervisor add this line AFTER your existing endpoint supervision
