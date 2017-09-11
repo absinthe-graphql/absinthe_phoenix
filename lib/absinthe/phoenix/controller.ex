@@ -3,36 +3,38 @@ defmodule Absinthe.Phoenix.Controller do
   defmacro __using__(opts \\ []) do
     schema = Keyword.fetch!(opts, :schema)
     quote do
+      @behaviour unquote(__MODULE__)
       @before_compile unquote(__MODULE__)
       @on_definition {unquote(__MODULE__), :register_graphql_action}
       Module.register_attribute(__MODULE__, :graphql_actions, accumulate: true)
 
       plug unquote(__MODULE__).Action, schema: unquote(schema)
 
-      @spec coerce_to_graphql_input(value :: any, target_type :: Absinthe.Type.t) :: any
-      def coerce_to_graphql_input(value, %Absinthe.Type.NonNull{of_type: inner_target_type}) do
-        coerce_to_graphql_input(value, inner_target_type)
+      @impl unquote(__MODULE__)
+      @spec cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
+      def cast_param(value, %Absinthe.Type.NonNull{of_type: inner_target_type}, schema) do
+        cast_param(value, inner_target_type, schema)
       end
-      def coerce_to_graphql_input(values, %Absinthe.Type.List{of_type: inner_target_type}) when is_list(values) do
+      def cast_param(values, %Absinthe.Type.List{of_type: inner_target_type}, schema) when is_list(values) do
         for value <- values do
-          coerce_to_graphql_input(value, inner_target_type)
+          cast_param(value, inner_target_type, schema)
         end
       end
-      def coerce_to_graphql_input(value, %Absinthe.Type.InputObject{} = target_type) when is_map(value) do
+      def cast_param(value, %Absinthe.Type.InputObject{} = target_type, schema) when is_map(value) do
         for {name, field_value} <- value, into: %{} do
-          case Map.get(target_type.fields, name) do
+          case Map.values(target_type.fields) |> Enum.find(&(to_string(&1.identifier) == name)) do
             nil ->
               # Pass through value for error reporting by validations
               {name, field_value}
             field ->
               {
                 name,
-                coerce_to_graphql_input(field_value, field.type)
+                cast_param(field_value, Absinthe.Schema.lookup_type(schema, field.type), schema)
               }
           end
         end
       end
-      def coerce_to_graphql_input(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :integer}}) when is_binary(value) do
+      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :integer}}, _schema) when is_binary(value) do
         case Integer.parse(value) do
           {result, _} ->
             result
@@ -41,7 +43,7 @@ defmodule Absinthe.Phoenix.Controller do
             value
         end
       end
-      def coerce_to_graphql_input(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :float}}) when is_binary(value) do
+      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :float}}, _schema) when is_binary(value) do
         case Float.parse(value) do
           {result, _} ->
             result
@@ -50,10 +52,10 @@ defmodule Absinthe.Phoenix.Controller do
             value
         end
       end
-      def coerce_to_graphql_input(value, target_type) do
+      def cast_param(value, target_type, schema) do
         value
       end
-      defoverridable [coerce_to_graphql_input: 2]
+      defoverridable [cast_param: 3]
 
     end
   end
@@ -87,5 +89,6 @@ defmodule Absinthe.Phoenix.Controller do
     :ok
   end
 
+  @callback cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
 
 end

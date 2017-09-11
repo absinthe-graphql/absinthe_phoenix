@@ -76,16 +76,16 @@ defmodule Absinthe.Phoenix.Controller.Action do
   @spec parse_variables(document :: Absinthe.Blueprint.t, params :: map, schema :: Absinthe.Schema.t, controller :: module) :: %{String.t => any}
   defp parse_variables(document, params, schema, controller) do
     params
-    |> do_parse_variables(variable_types(document, schema), controller)
+    |> do_parse_variables(variable_types(document, schema), schema, controller)
   end
 
-  @spec do_parse_variables(params :: map, variable_types :: %{String.t => Absinthe.Type.t}, controller :: module) :: map
-  defp do_parse_variables(params, variable_types, controller) do
+  @spec do_parse_variables(params :: map, variable_types :: %{String.t => Absinthe.Type.t}, schema :: Absinthe.Schema.t, controller :: module) :: map
+  defp do_parse_variables(params, variable_types, schema, controller) do
     for {name, raw_value} <- params, into: %{} do
       target_type = Map.fetch!(variable_types, name)
       {
         name,
-        controller.coerce_to_graphql_input(raw_value, target_type)
+        controller.cast_param(raw_value, target_type, schema)
       }
     end
   end
