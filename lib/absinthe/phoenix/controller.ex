@@ -125,6 +125,6 @@ defmodule Absinthe.Phoenix.Controller do
   end
 
   @callback cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
-  @callback pipeline(Absinthe.Pipeline.t) :: Absinthe.Pipeline.t
+  @callback absinthe_pipeline(schema :: Absinthe.Schema.t, pipeline :: Absinthe.Pipeline.t) :: Absinthe.Pipeline.t
 
 end
