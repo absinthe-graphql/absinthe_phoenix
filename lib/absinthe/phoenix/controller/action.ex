@@ -5,7 +5,6 @@ defmodule Absinthe.Phoenix.Controller.Action do
 
   @type opts :: [
     {:schema, Absinthe.Schema.t},
-    {:document_provider, Absinthe.Plug.DocumentProvider.Compiled.t},
   ]
 
   @impl true
@@ -18,17 +17,20 @@ defmodule Absinthe.Phoenix.Controller.Action do
   @spec call(conn :: Plug.Conn.t, opts :: opts) :: Plug.Conn.t
   def call(conn, opts) do
     schema = Keyword.fetch!(opts, :schema)
-    case graphql_document(conn, Keyword.fetch!(opts, :document_provider)) do
+    controller = conn.private.phoenix_controller
+    document_provider = Module.safe_concat(controller, GraphQL)
+    case graphql_document(conn, document_provider) do
       nil ->
         conn
       document ->
-        execute(conn, schema, document)
+        execute(conn, schema, controller, document)
     end
   end
 
-  @spec execute(conn :: Plug.Conn.t, schema :: Absinthe.Schema.t, document :: Absinthe.Blueprint.t) :: Plug.Conn.t
-  defp execute(conn, schema, document) do
-    case Absinthe.Pipeline.run(document, pipeline(schema, conn.params)) do
+  @spec execute(conn :: Plug.Conn.t, schema :: Absinthe.Schema.t, controller :: module, document :: Absinthe.Blueprint.t) :: Plug.Conn.t
+  defp execute(conn, schema, controller, document) do
+    variables = parse_variables(document, conn.params, schema, controller)
+    case Absinthe.Pipeline.run(document, pipeline(schema, variables)) do
       {:ok, %{result: result}, _phases} ->
         conn
         |> Plug.Conn.put_private(:absinthe_variables, conn.params)
@@ -69,6 +71,48 @@ defmodule Absinthe.Phoenix.Controller.Action do
     |> Absinthe.Pipeline.from(Absinthe.Phase.Document.Variables)
     |> Absinthe.Pipeline.before(Absinthe.Phase.Document.Result)
     |> Absinthe.Pipeline.without(Absinthe.Phase.Document.Validation.ScalarLeafs)
+  end
+
+  @spec parse_variables(document :: Absinthe.Blueprint.t, params :: map, schema :: Absinthe.Schema.t, controller :: module) :: %{String.t => any}
+  defp parse_variables(document, params, schema, controller) do
+    params
+    |> do_parse_variables(variable_types(document, schema), controller)
+  end
+
+  @spec do_parse_variables(params :: map, variable_types :: %{String.t => Absinthe.Type.t}, controller :: module) :: map
+  defp do_parse_variables(params, variable_types, controller) do
+    for {name, raw_value} <- params, into: %{} do
+      target_type = Map.fetch!(variable_types, name)
+      {
+        name,
+        controller.coerce_to_graphql_input(raw_value, target_type)
+      }
+    end
+  end
+
+  @type_mapping %{
+    Absinthe.Blueprint.TypeReference.List => Absinthe.Type.List,
+    Absinthe.Blueprint.TypeReference.NonNull => Absinthe.Type.NonNull
+  }
+
+  # TODO: Extract this from here & Absinthe.Phase.Schema to a common function
+  @spec type_reference_to_type(Absinthe.Blueprint.TypeReference.t, Absinthe.Schema.t) :: Absinthe.Type.t
+  defp type_reference_to_type(%Absinthe.Blueprint.TypeReference.Name{name: name}, schema) do
+    Absinthe.Schema.lookup_type(schema, name)
+  end
+  for {blueprint_type, core_type} <- @type_mapping do
+    defp type_reference_to_type(%unquote(blueprint_type){} = node, schema) do
+      inner = type_reference_to_type(node.of_type, schema)
+      %unquote(core_type){of_type: inner}
+    end
+  end
+
+  # TODO: Extract this to a function (probably on Absinthe.Blueprint.Document.Operation)
+  @spec variable_types(Absinthe.Blueprint.t, Absinthe.Schema.t) :: %{String.t => Absinthe.Type.t}
+  defp variable_types(document, schema) do
+    for %{name: name, type: type} <- Absinthe.Blueprint.current_operation(document).variable_definitions, into: %{} do
+      {name, type_reference_to_type(type, schema)}
+    end
   end
 
 end
