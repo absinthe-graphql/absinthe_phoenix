@@ -25,7 +25,7 @@ defmodule Absinthe.Phoenix.Controller.Action do
   @spec execute(conn :: Plug.Conn.t, schema :: Absinthe.Schema.t, controller :: module, document :: Absinthe.Blueprint.t) :: Plug.Conn.t
   defp execute(conn, schema, controller, document) do
     variables = parse_variables(document, conn.params, schema, controller)
-    case Absinthe.Pipeline.run(document, pipeline(schema, variables)) do
+    case Absinthe.Pipeline.run(document, pipeline(schema, controller, variables)) do
       {:ok, %{result: result}, _phases} ->
         conn
         |> Plug.Conn.put_private(:absinthe_variables, conn.params)
@@ -53,20 +53,9 @@ defmodule Absinthe.Phoenix.Controller.Action do
     end
   end
 
-  @spec pipeline(schema :: Absinthe.Schema.t, variables :: %{String.t => any}) :: Absinthe.Pipeline.t
-  defp pipeline(schema, variables) do
-    pipeline_remainder(schema, variables) ++ [Absinthe.Phoenix.Controller.Result]
-  end
-
-  @spec pipeline_remainder(schema :: Absinthe.Schema.t, variables :: %{String.t => any}) :: Absinthe.Pipeline.t
-  defp pipeline_remainder(schema, variables) do
-    Absinthe.Pipeline.for_document(schema,
-      variables: variables,
-      result_phase: Absinthe.Phoenix.Controller.Result
-    )
-    |> Absinthe.Pipeline.from(Absinthe.Phase.Document.Variables)
-    |> Absinthe.Pipeline.before(Absinthe.Phase.Document.Result)
-    |> Absinthe.Pipeline.without(Absinthe.Phase.Document.Validation.ScalarLeafs)
+  @spec pipeline(schema :: Absinthe.Schema.t, controller :: module, variables :: %{String.t => any}) :: Absinthe.Pipeline.t
+  defp pipeline(schema, controller, variables) do
+    controller.absinthe_pipeline(schema, variables)
   end
 
   @spec parse_variables(document :: Absinthe.Blueprint.t, params :: map, schema :: Absinthe.Schema.t, controller :: module) :: %{String.t => any}

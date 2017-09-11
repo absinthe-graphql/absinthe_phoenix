@@ -59,6 +59,23 @@ defmodule Absinthe.Phoenix.Controller do
       end
       defoverridable [cast_param: 3]
 
+      # TODO: Expect GraphQL to be marked up with a directive, eg, @raw vs
+      # mucking with the validations and result phase
+      @impl unquote(__MODULE__)
+      @spec absinthe_pipeline(schema :: Absinthe.Schema.t, variables :: %{String.t => any}) :: Absinthe.Pipeline.t
+      def absinthe_pipeline(schema, variables) do
+        pipeline =
+          Absinthe.Pipeline.for_document(schema,
+            variables: variables,
+            result_phase: Absinthe.Phoenix.Controller.Result
+          )
+          |> Absinthe.Pipeline.from(Absinthe.Phase.Document.Variables)
+          |> Absinthe.Pipeline.before(Absinthe.Phase.Document.Result)
+          |> Absinthe.Pipeline.without(Absinthe.Phase.Document.Validation.ScalarLeafs)
+        pipeline ++ [Absinthe.Phoenix.Controller.Result]
+      end
+      defoverridable [absinthe_pipeline: 2]
+
     end
   end
 
@@ -108,5 +125,6 @@ defmodule Absinthe.Phoenix.Controller do
   end
 
   @callback cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
+  @callback pipeline(Absinthe.Pipeline.t) :: Absinthe.Pipeline.t
 
 end
