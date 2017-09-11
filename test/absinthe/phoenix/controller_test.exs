@@ -42,6 +42,22 @@ defmodule Absinthe.Phoenix.ControllerTest do
 
   end
 
+  defmodule ReverseSchema do
+    use Absinthe.Schema
+
+    query do
+      field :string, :string do
+        arg :echo, :string
+        resolve &resolve_echo/3
+      end
+    end
+
+    def resolve_echo(_, %{echo: echo}, _) do
+      {:ok, echo |> String.reverse}
+    end
+
+  end
+
   defmodule Controller do
     use Phoenix.Controller
     use Absinthe.Phoenix.Controller, schema: Absinthe.Phoenix.ControllerTest.Schema
@@ -50,6 +66,12 @@ defmodule Absinthe.Phoenix.ControllerTest do
     query ($echo: String) { string(echo: $echo) }
     """
     def string(conn, %{data: data}), do: json(conn, data)
+
+    @graphql {"""
+    query ($echo: String) { string(echo: $echo) }
+    """, ReverseSchema}
+    def reverse_string(conn, %{data: data}), do: json(conn, data)
+
 
     @graphql """
     query ($echo: Int) { integer(echo: $echo) }
@@ -82,7 +104,12 @@ defmodule Absinthe.Phoenix.ControllerTest do
     test "input object with integers" do
       assert %{"input_object_with_integers" => %{"foo" => 1, "bar" => 2, "baz" => 3}} == result(Controller, :input_object_with_integers, %{"echo" => %{"foo" => "1", "bar" => "2", "baz" => "3"}})
     end
+  end
 
+  describe "using an alternate schema" do
+    test "can be defined using a @graphql tuple" do
+      assert %{"string" => "eno"} == result(Controller, :reverse_string, %{"echo" => "one"})
+    end
   end
 
   def result(controller, name, params, verb \\ :get) do

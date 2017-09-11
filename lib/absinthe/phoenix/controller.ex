@@ -8,7 +8,9 @@ defmodule Absinthe.Phoenix.Controller do
       @on_definition {unquote(__MODULE__), :register_graphql_action}
       Module.register_attribute(__MODULE__, :graphql_actions, accumulate: true)
 
-      plug unquote(__MODULE__).Action, schema: unquote(schema)
+      @absinthe_schema unquote(schema)
+
+      plug unquote(__MODULE__).Action
 
       @impl unquote(__MODULE__)
       @spec cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
@@ -62,26 +64,42 @@ defmodule Absinthe.Phoenix.Controller do
 
   defmacro __before_compile__(env) do
     actions = Module.get_attribute(env.module, :graphql_actions)
+    provides = for {name, doc, _} <- actions, do: {name, doc}
+    schemas = for {name, _, schema} <- actions, do: {to_string(name), schema}
     quote do
 
       defmodule GraphQL do
         use Absinthe.Plug.DocumentProvider.Compiled
-        provide unquote(actions)
+        provide unquote(provides)
+
+        @absinthe_schemas %{unquote_splicing(schemas)}
+        def lookup_schema(name) do
+          @absinthe_schemas[name]
+        end
+
       end
 
     end
   end
 
   def register_graphql_action(env, :def, name, _args, _guards, _body) do
+    default_schema = Module.get_attribute(env.module, :absinthe_schema)
     case Module.get_attribute(env.module, :graphql) do
       nil ->
         :ok
+      {document, schema} ->
+        Module.delete_attribute(env.module,
+          :graphql
+        )
+        Module.put_attribute(env.module,
+          :graphql_actions, {name, document, schema}
+        )
       document ->
         Module.delete_attribute(env.module,
           :graphql
         )
         Module.put_attribute(env.module,
-          :graphql_actions, {name, document}
+          :graphql_actions, {name, document, default_schema}
         )
     end
   end

@@ -3,26 +3,21 @@ defmodule Absinthe.Phoenix.Controller.Action do
 
   @behaviour Plug
 
-  @type opts :: [
-    {:schema, Absinthe.Schema.t},
-  ]
-
   @impl true
-  @spec init(opts :: opts) :: opts
+  @spec init(opts :: Keyword.t) :: Keyword.t
   def init(opts \\ []) do
     opts
   end
 
   @impl true
-  @spec call(conn :: Plug.Conn.t, opts :: opts) :: Plug.Conn.t
-  def call(conn, opts) do
-    schema = Keyword.fetch!(opts, :schema)
+  @spec call(conn :: Plug.Conn.t, opts :: Keyword.t) :: Plug.Conn.t
+  def call(conn, _opts) do
     controller = conn.private.phoenix_controller
     document_provider = Module.safe_concat(controller, GraphQL)
-    case graphql_document(conn, document_provider) do
-      nil ->
+    case document_and_schema(conn, document_provider) do
+      {doc, schema} when is_nil(doc) or is_nil(schema) ->
         conn
-      document ->
+      {document, schema} ->
         execute(conn, schema, controller, document)
     end
   end
@@ -45,15 +40,16 @@ defmodule Absinthe.Phoenix.Controller.Action do
   defp document_key(%{private: %{phoenix_action: name}}), do: to_string(name)
   defp document_key(_), do: nil
 
-  @spec graphql_document(conn :: Plug.Conn.t, document_provider :: Absinthe.Plug.DocumentProvider.Compiled.t) :: nil | Absinthe.Blueprint.t
-  defp graphql_document(conn, document_provider) do
+  @spec document_and_schema(conn :: Plug.Conn.t, document_provider :: Absinthe.Plug.DocumentProvider.Compiled.t) :: {nil | Absinthe.Blueprint.t, nil | Absinthe.Schema.t}
+  defp document_and_schema(conn, document_provider) do
     case document_key(conn) do
       nil ->
         nil
       key ->
-        Absinthe.Plug.DocumentProvider.Compiled.get(document_provider,
-          key, :compiled
-        )
+        {
+          Absinthe.Plug.DocumentProvider.Compiled.get(document_provider, key, :compiled),
+          document_provider.lookup_schema(key)
+        }
     end
   end
 
