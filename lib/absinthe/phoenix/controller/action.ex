@@ -1,4 +1,6 @@
 defmodule Absinthe.Phoenix.Controller.Action do
+  @moduledoc false
+
   import Plug.Conn
 
   @behaviour Plug
