@@ -109,8 +109,8 @@ subscription do
     # subscription {
     #   commentAdded(repoFullName: "elixir-lang/elixir") { content }
     # }
-    topic fn args ->
-      args.repo_full_name
+    config fn args, _ ->
+      {:ok, topic: args.repo_full_name}
     end
 
     # this tells Absinthe to run any subscriptions with this field every time
