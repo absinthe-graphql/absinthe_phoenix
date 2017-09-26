@@ -29,25 +29,8 @@ use Absinthe.Phoenix.Endpoint
 In your socket add:
 
 ```elixir
-use Absinthe.Phoenix.Socket
-```
-
-You also need to configure the schema by adding it to the socket assigns. Here
-is an example socket:
-
-```elixir
-defmodule GitHunt.Web.UserSocket do
-  use Phoenix.Socket
-  use Absinthe.Phoenix.Socket
-
-  transport :websocket, Phoenix.Transports.WebSocket
-
-  def connect(_params, socket) do
-    {:ok, assign(socket, :absinthe, %{schema: MyApp.Web.Schema})}
-  end
-
-  def id(_socket), do: nil
-end
+use Absinthe.Phoenix.Socket,
+  schema: MyApp.Web.Schema
 ```
 
 Where `MyApp.Web.Schema` is the name of your Absinthe schema module.
@@ -64,6 +47,34 @@ forward "/graphiql", Absinthe.Plug.GraphiQL,
   schema: JLR.Web.Schema,
   socket: JLR.Web.UserSocket,
   interface: :simple
+```
+
+### Setting Options
+
+Options like the context can be configured in the `def connect` callback of your
+socket
+
+```elixir
+defmodule GitHunt.Web.UserSocket do
+  use Phoenix.Socket
+  use Absinthe.Phoenix.Socket
+
+  transport :websocket, Phoenix.Transports.WebSocket
+
+  def connect(params, socket) do
+    current_user = current_user(params)
+    socket = Absinthe.Phoenix.Socket.put_opts(context: %{
+      current_user: current_user
+    })
+    {:ok, socket}
+  end
+
+  defp current_user(%{"user_id" => id}) do
+    MyApp.Repo.get(User, id)
+  end
+
+  def id(_socket), do: nil
+end
 ```
 
 ### JavaScript Clients

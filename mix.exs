@@ -3,7 +3,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   def project do
     [app: :absinthe_phoenix,
-     version: "1.4.0-rc.0",
+     version: "1.4.0-rc.1",
      elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
@@ -33,10 +33,10 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe, "~> 1.4.0-rc"},
+      {:absinthe, "~> 1.4.0-rc.1"},
       {:decimal, "~> 1.0"},
-      {:phoenix, "~> 1.0 or ~> 1.3.0-rc"},
-      {:phoenix_pubsub, "~> 1.0 or ~> 1.3.0-rc"},
+      {:phoenix, "~> 1.2"},
+      {:phoenix_pubsub, "~> 1.0"},
       {:ex_doc, "~> 0.14", only: :dev},
       {:poison, "~> 2.0 or ~> 3.0"},
     ]

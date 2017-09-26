@@ -2,6 +2,8 @@ defmodule Absinthe.Phoenix.Channel do
   use Phoenix.Channel
   require Logger
 
+  @moduledoc false
+
   @doc false
   def __using__(_) do
     raise """
@@ -14,6 +16,8 @@ defmodule Absinthe.Phoenix.Channel do
   @doc false
   def join("__absinthe__:control", _, socket) do
 
+    schema = socket.assigns[:__absinthe_schema__]
+
     absinthe_config = socket.assigns[:absinthe]
 
     opts =
@@ -23,7 +27,9 @@ defmodule Absinthe.Phoenix.Channel do
         Map.put(context, :pubsub, socket.endpoint)
       end)
 
-    absinthe_config = put_in(absinthe_config[:opts], opts)
+    absinthe_config =
+      put_in(absinthe_config[:opts], opts)
+      |> Map.update(:schema, schema, &(&1))
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -46,24 +52,44 @@ defmodule Absinthe.Phoenix.Channel do
       opts,
     })
 
-    result = Absinthe.run(query, config.schema, opts)
+    {reply, socket} = case run(query, config.schema, opts) do
+      {:ok, %{"subscribed" => topic}, context} ->
+        :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
+          fastlane: {socket.transport_pid, socket.serializer, []},
+          link: true,
+        ])
 
-    reply = with {:ok, %{"subscribed" => topic}} <- result do
-      :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
-        fastlane: {socket.transport_pid, socket.serializer, []},
-        link: true,
-      ])
+        socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
 
-      {:ok, %{subscriptionId: topic}}
+        {{:ok, %{subscriptionId: topic}}, socket}
+
+      {:ok, reply, context} ->
+        socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
+        {{:ok, reply}, socket}
+
+      reply ->
+        {reply, socket}
     end
 
     {:reply, reply, socket}
   end
-
   def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
     Phoenix.PubSub.unsubscribe(socket.pubsub_server, doc_id)
     Absinthe.Subscription.unsubscribe(socket.endpoint, doc_id)
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
+  end
+
+  defp run(document, schema, options) do
+    pipeline =
+      schema
+      |> Absinthe.Pipeline.for_document(options)
+
+    case Absinthe.Pipeline.run(document, pipeline) do
+      {:ok, %{result: result, resolution: res}, _phases} ->
+        {:ok, result, res.context}
+      {:error, msg, _phases} ->
+        {:error, msg}
+    end
   end
 
 end

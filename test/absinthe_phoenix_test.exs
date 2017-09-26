@@ -84,4 +84,33 @@ defmodule Absinthe.PhoenixTest do
     expected = %{data: %{"addComment" => %{"contents" => "raise"}}}
     assert expected == reply
   end
+
+  test "context changes are persisted across documents", %{socket: socket} do
+    ref = push socket, "doc", %{
+      "query" => "{me { name }}"
+    }
+    assert_reply ref, :ok, reply
+
+    assert reply == %{
+      data: %{"me" => nil}
+    }
+
+    ref = push socket, "doc", %{
+      "query" => "mutation {login { name }}"
+    }
+    assert_reply ref, :ok, reply
+
+    assert reply == %{
+      data: %{"login" => %{"name" => "Ben"}}
+    }
+
+    ref = push socket, "doc", %{
+      "query" => "{me { name }}"
+    }
+    assert_reply ref, :ok, reply
+
+    assert reply == %{
+      data: %{"me" => %{"name" => "Ben"}}
+    }
+  end
 end

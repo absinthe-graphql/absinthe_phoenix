@@ -28,6 +28,11 @@ defmodule Schema do
   end
 
   query do
+    field :me, :user do
+      resolve fn _, %{context: context} ->
+        {:ok, context[:current_user]}
+      end
+    end
     field :users, list_of(:user) do
       resolve fn _, _ ->
         users = [
@@ -40,6 +45,15 @@ defmodule Schema do
 
   mutation do
     import_fields :mutation_fields
+
+    field :login, :user do
+      middleware fn res, _ ->
+        user = %{name: "Ben"}
+        res
+        |> Map.update!(:context, &Map.put(&1, :current_user, user))
+        |> Absinthe.Resolution.put_result({:ok, user})
+      end
+    end
   end
 
   subscription do
