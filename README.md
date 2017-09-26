@@ -77,7 +77,7 @@ defmodule GitHunt.Web.UserSocket do
 
   def connect(params, socket) do
     current_user = current_user(params)
-    socket = Absinthe.Phoenix.Socket.put_opts(context: %{
+    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
       current_user: current_user
     })
     {:ok, socket}
