@@ -21,7 +21,11 @@ defmodule Absinthe.Phoenix.Socket do
 
         def id(_socket), do: nil
       end
-    """
+    
+  ## Phoenix 1.2
+
+  If you're on Phoenix 1.2 see `put_schema/2`
+  """
 
   defmacro __using__(opts) do
     schema = Keyword.get(opts, :schema)
@@ -39,7 +43,7 @@ defmodule Absinthe.Phoenix.Socket do
   ```
   def connect(params, socket) do
     current_user = current_user(params)
-    socket = Absinthe.Phoenix.Socket.put_opts(context: %{
+    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
       current_user: current_user
     })
     {:ok, socket}
@@ -52,11 +56,28 @@ defmodule Absinthe.Phoenix.Socket do
   """
   @spec put_opts(Phoenix.Socket.t, Absinthe.run_opts) :: Phoenix.Socket.t
   def put_opts(socket, opts) do
-    absinthe_config =
+    absinthe_assigns =
       socket.assigns
       |> Map.get(:absinthe, %{})
       |> Map.put(:opts, opts)
     
-    Phoenix.Socket.assign(socket, :absinthe, absinthe_config)
+    Phoenix.Socket.assign(socket, :absinthe, absinthe_assigns)
+  end
+
+  @doc """
+  Configure the schema for a socket
+
+  Only use this if you are not yet on Phoenix 1.3. If you're on Phoenix 1.3, read the moduledocs.
+
+
+  """
+  @spec put_schema(Phoenix.Socket.t, Absinthe.Schema.t) :: Phoenix.Socket.t
+  def put_schema(socket, schema) do
+    absinthe_assigns =
+      socket.assigns
+      |> Map.get(:absinthe, %{})
+      |> Map.put(:schema, schema)
+
+    Phoenix.Socket.assign(socket, :absinthe, absinthe_assigns)
   end
 end

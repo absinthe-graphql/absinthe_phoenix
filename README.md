@@ -28,10 +28,23 @@ use Absinthe.Phoenix.Endpoint
 
 In your socket add:
 
+#### Phoenix 1.3
 ```elixir
 use Absinthe.Phoenix.Socket,
   schema: MyApp.Web.Schema
 ```
+
+#### Phoenix 1.2
+
+```elixir
+  use Absinthe.Phoenix.Socket
+  def connect(params, socket) do
+    current_user = current_user(params)
+    socket = Absinthe.Phoenix.Socket.put_schema(socket, MyApp.Web.Schema)
+    {:ok, socket}
+  end
+```
+
 
 Where `MyApp.Web.Schema` is the name of your Absinthe schema module.
 
