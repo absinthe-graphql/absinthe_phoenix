@@ -113,4 +113,22 @@ defmodule Absinthe.PhoenixTest do
       data: %{"me" => %{"name" => "Ben"}}
     }
   end
+
+  test "config functions can return errors", %{socket: socket} do
+    ref = push socket, "doc", %{
+      "query" => "subscription {errors { __typename }}"
+    }
+    assert_reply ref, :ok, reply
+
+    assert reply == %{errors: [%{locations: [%{column: 0, line: 1}], message: "unauthorized"}]}
+  end
+
+  test "can't do multiple fields on a subscription root", %{socket: socket} do
+    ref = push socket, "doc", %{
+      "query" => "subscription {errors { __typename }, foo: errors { __typename }}"
+    }
+    assert_reply ref, :ok, reply
+
+    assert reply == %{errors: [%{locations: [], message: "Only one field is permitted on the root object when subscribing"}]}
+  end
 end

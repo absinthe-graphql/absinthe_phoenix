@@ -67,7 +67,7 @@ defmodule Absinthe.Phoenix.Channel do
         socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
         {{:ok, reply}, socket}
 
-      reply ->
+      {:error, reply} ->
         {reply, socket}
     end
 

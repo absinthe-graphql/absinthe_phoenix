@@ -78,5 +78,11 @@ defmodule Schema do
 
       resolve fn _, _ -> raise "boom" end
     end
+
+    field :errors, :comment do
+      config fn _, _ ->
+        {:error, "unauthorized"}
+      end
+    end
   end
 end

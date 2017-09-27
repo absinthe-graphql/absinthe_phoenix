@@ -33,7 +33,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe, "~> 1.4.0-rc.1"},
+      {:absinthe, "~> 1.4.0-rc.2"},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.2"},
       {:phoenix_pubsub, "~> 1.0"},
