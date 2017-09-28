@@ -3,7 +3,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   def project do
     [app: :absinthe_phoenix,
-     version: "1.4.0-rc.2",
+     version: "1.4.0-rc.3",
      elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,

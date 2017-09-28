@@ -18,7 +18,7 @@ defmodule Absinthe.Phoenix.Channel do
 
     schema = socket.assigns[:__absinthe_schema__]
 
-    absinthe_config = socket.assigns[:absinthe]
+    absinthe_config = Map.get(socket.assigns, :absinthe, %{})
 
     opts =
       absinthe_config
