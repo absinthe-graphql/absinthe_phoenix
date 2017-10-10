@@ -16,7 +16,7 @@ defmodule Absinthe.Phoenix.Mixfile do
     [description: "Subscription support via Phoenix for Absinthe, the GraphQL implementation for Elixir.",
      files: ["lib", "mix.exs", "README*"],
      maintainers: ["Ben Wilson", "Bruce Williams"],
-     licenses: ["BSD"],
+     licenses: ["MIT"],
      links: %{
        site: "http://absinthe-graphql.org",
        github: "https://github.com/absinthe-graphql/absinthe_phoenix",
