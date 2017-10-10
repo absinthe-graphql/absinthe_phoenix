@@ -1,5 +1,7 @@
 # Absinthe.Phoenix
 
+[![Hex pm](http://img.shields.io/hexpm/v/absinthe_phoenix.svg?style=flat)](https://hex.pm/packages/absinthe_phoenix)[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 ## Subscriptions
 
 This readme is going to be the primary source of info on how to use Absinthe Subscriptions
@@ -156,3 +158,7 @@ subscription do
   end
 end
 ```
+
+## License
+
+See [LICENSE.md](./LICENSE.md).
