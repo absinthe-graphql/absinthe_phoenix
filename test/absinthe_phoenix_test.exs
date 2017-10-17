@@ -1,6 +1,8 @@
 defmodule Absinthe.PhoenixTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   use Absinthe.Phoenix.ChannelCase
+
+  import ExUnit.CaptureLog
 
   setup_all do
     Absinthe.Test.prime(Schema)
@@ -77,12 +79,16 @@ defmodule Absinthe.PhoenixTest do
     }
     assert_reply ref, :ok, %{subscriptionId: _subscription_ref}
 
-    ref = push socket, "doc", %{
-      "query" => "mutation {addComment(contents: \"raise\") { contents }}"
-    }
-    assert_reply ref, :ok, reply
-    expected = %{data: %{"addComment" => %{"contents" => "raise"}}}
-    assert expected == reply
+    log = capture_log(fn ->
+      ref = push socket, "doc", %{
+        "query" => "mutation {addComment(contents: \"raise\") { contents }}"
+      }
+      assert_reply ref, :ok, reply
+      expected = %{data: %{"addComment" => %{"contents" => "raise"}}}
+      assert expected == reply
+    end)
+
+    assert String.contains?(log, "boom")
   end
 
   test "context changes are persisted across documents", %{socket: socket} do

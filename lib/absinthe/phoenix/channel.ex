@@ -85,7 +85,7 @@ defmodule Absinthe.Phoenix.Channel do
       |> Absinthe.Pipeline.for_document(options)
 
     case Absinthe.Pipeline.run(document, pipeline) do
-      {:ok, %{result: result, resolution: res}, _phases} ->
+      {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
       {:error, msg, _phases} ->
         {:error, msg}
