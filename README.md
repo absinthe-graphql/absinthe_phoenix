@@ -1,5 +1,7 @@
 # Absinthe.Phoenix
 
+[![Hex pm](http://img.shields.io/hexpm/v/absinthe_phoenix.svg?style=flat)](https://hex.pm/packages/absinthe_phoenix)[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 ## Subscriptions
 
 This readme is going to be the primary source of info on how to use Absinthe Subscriptions
@@ -28,27 +30,23 @@ use Absinthe.Phoenix.Endpoint
 
 In your socket add:
 
+#### Phoenix 1.3
 ```elixir
-use Absinthe.Phoenix.Socket
+use Absinthe.Phoenix.Socket,
+  schema: MyApp.Web.Schema
 ```
 
-You also need to configure the schema by adding it to the socket assigns. Here
-is an example socket:
+#### Phoenix 1.2
 
 ```elixir
-defmodule GitHunt.Web.UserSocket do
-  use Phoenix.Socket
   use Absinthe.Phoenix.Socket
-
-  transport :websocket, Phoenix.Transports.WebSocket
-
-  def connect(_params, socket) do
-    {:ok, assign(socket, :absinthe, %{schema: MyApp.Web.Schema})}
+  def connect(params, socket) do
+    current_user = current_user(params)
+    socket = Absinthe.Phoenix.Socket.put_schema(socket, MyApp.Web.Schema)
+    {:ok, socket}
   end
-
-  def id(_socket), do: nil
-end
 ```
+
 
 Where `MyApp.Web.Schema` is the name of your Absinthe schema module.
 
@@ -64,6 +62,35 @@ forward "/graphiql", Absinthe.Plug.GraphiQL,
   schema: JLR.Web.Schema,
   socket: JLR.Web.UserSocket,
   interface: :simple
+```
+
+### Setting Options
+
+Options like the context can be configured in the `def connect` callback of your
+socket
+
+```elixir
+defmodule GitHunt.Web.UserSocket do
+  use Phoenix.Socket
+  use Absinthe.Phoenix.Socket,
+    schema: MyApp.Web.Schema
+
+  transport :websocket, Phoenix.Transports.WebSocket
+
+  def connect(params, socket) do
+    current_user = current_user(params)
+    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
+      current_user: current_user
+    })
+    {:ok, socket}
+  end
+
+  defp current_user(%{"user_id" => id}) do
+    MyApp.Repo.get(User, id)
+  end
+
+  def id(_socket), do: nil
+end
 ```
 
 ### JavaScript Clients
@@ -109,8 +136,8 @@ subscription do
     # subscription {
     #   commentAdded(repoFullName: "elixir-lang/elixir") { content }
     # }
-    topic fn args ->
-      args.repo_full_name
+    config fn args, _ ->
+      {:ok, topic: args.repo_full_name}
     end
 
     # this tells Absinthe to run any subscriptions with this field every time
@@ -131,3 +158,7 @@ subscription do
   end
 end
 ```
+
+## License
+
+See [LICENSE.md](./LICENSE.md).

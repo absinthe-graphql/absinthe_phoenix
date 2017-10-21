@@ -13,7 +13,7 @@ defmodule Absinthe.Phoenix.Controller.Result do
   end
 
   defp process(blueprint) do
-    result = case blueprint.resolution do
+    result = case blueprint.execution do
       %{validation_errors: [], result: nil} ->
         :execution_failed
       %{validation_errors: [], result: result} ->
@@ -50,9 +50,9 @@ defmodule Absinthe.Phoenix.Controller.Result do
     # Change: Don't serialize scalars
     value =
       case Type.unwrap(emitter.schema_node.type) do
-        %Type.Scalar{} = schema_node ->
+        %Type.Scalar{} ->
           value
-        %Type.Enum{} = schema_node ->
+        %Type.Enum{} ->
           value
       end
     {value, errors}
@@ -63,7 +63,7 @@ defmodule Absinthe.Phoenix.Controller.Result do
     # Change: Return the intact `root_value`
     {field.root_value, errors}
   end
-  defp data(%{fields: fields} = field, errors) do
+  defp data(%{fields: fields}, errors) do
     field_data(fields, errors)
   end
 
