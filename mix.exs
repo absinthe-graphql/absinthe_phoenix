@@ -10,7 +10,7 @@ defmodule Absinthe.Phoenix.Mixfile do
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     docs: [source_ref: "v#{@version}", main: "Absinthe"],
+     docs: [source_ref: "v#{@version}"],
      package: package(),
      deps: deps()]
   end
