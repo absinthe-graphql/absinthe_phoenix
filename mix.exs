@@ -33,7 +33,9 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe, "~> 1.4.0-rc.2"},
+      {:absinthe_plug, "~> 1.4.0-rc"},
+      # {:absinthe, "~> 1.4.0-rc.2"},
+      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.2"},
       {:phoenix_pubsub, "~> 1.0"},
