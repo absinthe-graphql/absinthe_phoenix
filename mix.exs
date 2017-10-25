@@ -1,13 +1,16 @@
 defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
+  @version "1.4.0-rc.4"
+
   def project do
     [app: :absinthe_phoenix,
-     version: "1.4.0-rc.3",
+     version: @version,
      elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     docs: [source_ref: "v#{@version}", main: "Absinthe"],
      package: package(),
      deps: deps()]
   end
@@ -33,9 +36,8 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe_plug, "~> 1.4.0-rc"},
-      # {:absinthe, "~> 1.4.0-rc.2"},
-      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
+      {:absinthe_plug, "~> 1.4.0-rc.1"},
+      {:absinthe, "~> 1.4.0-rc.3"},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.2"},
       {:phoenix_pubsub, "~> 1.0"},
