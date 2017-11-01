@@ -58,14 +58,16 @@ defmodule Absinthe.Phoenix.Channel do
           fastlane: {socket.transport_pid, socket.serializer, []},
           link: true,
         ])
-
         socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
-
         {{:ok, %{subscriptionId: topic}}, socket}
 
-      {:ok, reply, context} ->
+      {:ok, %{data: _} = reply, context} ->
         socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
         {{:ok, reply}, socket}
+
+      {:ok, %{errors: _} = reply, context} ->
+        socket = Absinthe.Phoenix.Socket.put_opts(socket, context: context)
+        {{:error, reply}, socket}
 
       {:error, reply} ->
         {reply, socket}
