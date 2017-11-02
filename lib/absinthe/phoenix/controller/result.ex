@@ -61,8 +61,22 @@ defmodule Absinthe.Phoenix.Controller.Result do
   defp data(%{fields: []} = result, errors) do
     {result.root_value, errors}
   end
-  defp data(%{fields: fields}, errors) do
-    field_data(fields, errors)
+  defp data(%{fields: fields, emitter: emitter, root_value: root_value}, errors) do
+    with %{put: _} <- emitter.flags,
+    true <- is_map(root_value) do
+      {data, errors} = field_data(fields, errors)
+      {Map.merge(root_value, data), errors}
+    else
+      false ->
+        raise """
+        Invalid use of `@put` directive.
+
+        The `@put` directive can only be used on fields that return maps or lists
+        of maps.
+        """
+      _ ->
+        field_data(fields, errors)
+    end
   end
 
   # List
