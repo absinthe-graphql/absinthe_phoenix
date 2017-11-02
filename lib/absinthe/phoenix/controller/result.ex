@@ -9,15 +9,14 @@ defmodule Absinthe.Phoenix.Controller.Result do
 
   @spec run(Blueprint.t | Phase.Error.t, Keyword.t) :: {:ok, map}
   def run(%Blueprint{} = bp, _options \\ []) do
-    {:ok, %{bp | result: process(bp)}}
+    result = Map.merge(bp.result, process(bp))
+    {:ok, %{bp | result: result}}
   end
 
   defp process(blueprint) do
     result = case blueprint.execution do
-      %{validation_errors: [], result: nil} ->
-        :execution_failed
       %{validation_errors: [], result: result} ->
-        {:ok, field_data(result.fields, [])}
+        {:ok, data(result, [])}
       %{validation_errors: errors} ->
         {:validation_failed, errors}
     end
@@ -47,7 +46,7 @@ defmodule Absinthe.Phoenix.Controller.Result do
   # Leaf
   defp data(%{value: nil}, errors), do: {nil, errors}
   defp data(%{value: value, emitter: emitter}, errors) do
-    # Change: Don't serialize scalars
+    # Change: don't serialize scalars
     value =
       case Type.unwrap(emitter.schema_node.type) do
         %Type.Scalar{} ->
@@ -59,9 +58,8 @@ defmodule Absinthe.Phoenix.Controller.Result do
   end
 
   # Object
-  defp data(%{fields: []} = field, errors) do
-    # Change: Return the intact `root_value`
-    {field.root_value, errors}
+  defp data(%{fields: []} = result, errors) do
+    {result.root_value, errors}
   end
   defp data(%{fields: fields}, errors) do
     field_data(fields, errors)
@@ -72,24 +70,31 @@ defmodule Absinthe.Phoenix.Controller.Result do
 
   defp list_data(fields, errors, acc \\ [])
   defp list_data([], errors, acc), do: {:lists.reverse(acc), errors}
-  defp list_data([%{errors: []} = field | fields], errors, acc) do
+  defp list_data([%{errors: errs} = field | fields], errors, acc) do
     {value, errors} = data(field, errors)
-    list_data(fields, errors, [value | acc])
-  end
-  defp list_data([%{errors: errs} | fields], errors, acc) when length(errs) > 0 do
-    list_data(fields, errs ++ errors, acc)
+    list_data(fields, errs ++ errors, [value | acc])
   end
 
   defp field_data(fields, errors, acc \\ [])
   defp field_data([], errors, acc), do: {Map.new(acc), errors}
+  defp field_data([%Absinthe.Resolution{} = res | _], _errors, _acc) do
+    raise """
+    Found unresolved resolution struct!
+
+    You probably forgot to run the resolution phase again.
+
+    #{inspect res}
+    """
+  end
   defp field_data([field | fields], errors, acc) do
     {value, errors} = data(field, errors)
     field_data(fields, errors, [{field_name(field.emitter), value} | acc])
   end
 
-  defp field_name(%{alias: nil, name: name}), do: String.to_atom(name)
-  defp field_name(%{alias: name}), do: String.to_atom(name)
-  defp field_name(%{name: name}), do: String.to_atom(name)
+  # TODO: would prefer if the names / aliases were already atoms somehow
+  defp field_name(%{alias: nil, name: name}), do: String.to_existing_atom(name)
+  defp field_name(%{alias: name}), do: String.to_existing_atom(name)
+  defp field_name(%{name: name}), do: String.to_existing_atom(name)
 
   defp format_error(%Phase.Error{locations: []} = error) do
     error_object = %{message: error.message}
