@@ -65,7 +65,7 @@ defmodule Absinthe.Phoenix.Controller.Action do
     context =
       config
       |> Map.get(:context, %{})
-      |> Map.merge(extract_context(conn)
+      |> Map.merge(extract_context(conn))
 
     Map.merge(config, %{
       context: context,
