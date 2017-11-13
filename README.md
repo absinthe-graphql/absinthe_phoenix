@@ -68,7 +68,9 @@ Where `MyAppWeb.Schema` is the name of your Absinthe schema module.
 
 That is all that's required for setup on the server.
 
-## Basic Usage
+For client side guidance see the guides
+
+## GraphiQL Usage
 
 From within GraphiQL:
 To use Absinthe.Phoenix from within GraphiQL, you need to tell GraphiQL about your websocket endpoint.
@@ -78,7 +80,6 @@ forward "/graphiql", Absinthe.Plug.GraphiQL,
   schema: MyAppWeb.Schema,
   socket: MyAppWeb.UserSocket
 ```
-
 
 ## License
 
