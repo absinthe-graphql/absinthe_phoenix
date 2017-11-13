@@ -1,5 +1,5 @@
-%{"absinthe": {:git, "https://github.com/absinthe-graphql/absinthe.git", "4fb01045de4756d3d0496868316f7815b81c88a7", []},
-  "absinthe_plug": {:hex, :absinthe_plug, "1.4.0-rc.1", "c2bdcd1bcb48f3c40f678ef0aac251e7e8c4da51a764a7f6d9871e9f7603e6db", [:mix], [{:absinthe, "~> 1.4.0-rc.3", [hex: :absinthe, repo: "hexpm", optional: false]}, {:plug, "~> 1.3.2 or ~> 1.4", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
+%{"absinthe": {:hex, :absinthe, "1.4.0", "f2261f4bf62dd03a5fc75472b6ebfaa262f7133386d759cb965067e633888b0c", [:mix], [{:dataloader, "~> 1.0.0", [hex: :dataloader, repo: "hexpm", optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
+  "absinthe_plug": {:hex, :absinthe_plug, "1.4.0", "321ba4da280d4dcea5d6cce0f4a0b28aba2b32bee25f2f0855a8dc5ca02d29cf", [:mix], [{:absinthe, "~> 1.4", [hex: :absinthe, repo: "hexpm", optional: false]}, {:plug, "~> 1.3.2 or ~> 1.4", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "decimal": {:hex, :decimal, "1.4.1", "ad9e501edf7322f122f7fc151cce7c2a0c9ada96f2b0155b8a09a795c2029770", [:mix], [], "hexpm"},
   "earmark": {:hex, :earmark, "1.2.2", "f718159d6b65068e8daeef709ccddae5f7fdc770707d82e7d126f584cd925b74", [:mix], [], "hexpm"},
   "ex_doc": {:hex, :ex_doc, "0.16.2", "3b3e210ebcd85a7c76b4e73f85c5640c011d2a0b2f06dcdf5acdb2ae904e5084", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, repo: "hexpm", optional: false]}], "hexpm"},

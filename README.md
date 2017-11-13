@@ -10,11 +10,11 @@ For getting started guides on server side rendering see: https://hexdocs.pm/absi
 
 ## Installation
 
-Install from [Hex.pm](https://hex.pm/packages/absinthe_plug):
+Install from [Hex.pm](https://hex.pm/packages/absinthe_phoenix):
 
 ```elixir
 def deps do
-  [{:absinthe_plug, "~> 1.4.0"}]
+  [{:absinthe_phoenix, "~> 1.4.0"}]
 end
 ```
 
