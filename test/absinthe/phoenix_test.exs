@@ -35,7 +35,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "{users { errorField }}"
     }
-    assert_reply ref, :ok, reply
+    assert_reply ref, :error, reply
 
     expected = %{errors: [%{locations: [%{column: 0, line: 1}], message: "Cannot query field \"errorField\" on type \"User\"."}]}
 
@@ -46,7 +46,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "subscription {commentAdded { errorField }}"
     }
-    assert_reply ref, :ok, reply
+    assert_reply ref, :error, reply
 
     expected = %{errors: [%{locations: [%{column: 0, line: 1}], message: "Cannot query field \"errorField\" on type \"Comment\"."}]}
 
@@ -124,7 +124,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "subscription {errors { __typename }}"
     }
-    assert_reply ref, :ok, reply
+    assert_reply ref, :error, reply
 
     assert reply == %{errors: [%{locations: [%{column: 0, line: 1}], message: "unauthorized"}]}
   end
@@ -133,7 +133,7 @@ defmodule Absinthe.PhoenixTest do
     ref = push socket, "doc", %{
       "query" => "subscription {errors { __typename }, foo: errors { __typename }}"
     }
-    assert_reply ref, :ok, reply
+    assert_reply ref, :error, reply
 
     assert reply == %{errors: [%{locations: [], message: "Only one field is permitted on the root object when subscribing"}]}
   end

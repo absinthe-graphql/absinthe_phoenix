@@ -60,7 +60,9 @@ defmodule Absinthe.Phoenix.ControllerTest do
 
   defmodule Controller do
     use Phoenix.Controller
-    use Absinthe.Phoenix.Controller, schema: Absinthe.Phoenix.ControllerTest.Schema
+    use Absinthe.Phoenix.Controller,
+      schema: Absinthe.Phoenix.ControllerTest.Schema,
+      action: [mode: :internal]
 
     @graphql """
     query ($echo: String) { string(echo: $echo) }
