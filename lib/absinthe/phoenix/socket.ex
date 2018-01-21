@@ -13,7 +13,7 @@ defmodule Absinthe.Phoenix.Socket do
         transport :websocket, Phoenix.Transports.WebSocket
 
         def connect(params, socket) do
-          socket = Absinthe.Phoenix.Socket.put_opts(socket, [
+          socket = Absinthe.Phoenix.Socket.put_options(socket, [
             context: %{current_user: find_current_user(params)}
           ])
           {:ok, socket}
@@ -21,7 +21,7 @@ defmodule Absinthe.Phoenix.Socket do
 
         def id(_socket), do: nil
       end
-    
+
   ## Phoenix 1.2
 
   If you're on Phoenix 1.2 see `put_schema/2`
@@ -43,7 +43,7 @@ defmodule Absinthe.Phoenix.Socket do
   ```
   def connect(params, socket) do
     current_user = current_user(params)
-    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
+    socket = Absinthe.Phoenix.Socket.put_options(socket, context: %{
       current_user: current_user
     })
     {:ok, socket}
@@ -54,14 +54,20 @@ defmodule Absinthe.Phoenix.Socket do
   end
   ```
   """
-  @spec put_opts(Phoenix.Socket.t, Absinthe.run_opts) :: Phoenix.Socket.t
-  def put_opts(socket, opts) do
+  @spec put_options(Phoenix.Socket.t, Absinthe.run_opts) :: Phoenix.Socket.t
+  def put_options(socket, opts) do
     absinthe_assigns =
       socket.assigns
       |> Map.get(:absinthe, %{})
       |> Map.put(:opts, opts)
-    
+
     Phoenix.Socket.assign(socket, :absinthe, absinthe_assigns)
+  end
+
+  @doc false
+  @deprecated "Use put_options/2 instead."
+  def put_opts(socket, opts) do
+    put_options(socket, opts)
   end
 
   @doc """
