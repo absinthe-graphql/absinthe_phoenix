@@ -177,6 +177,7 @@ defmodule Absinthe.Phoenix.Controller do
       @before_compile unquote(__MODULE__)
       @on_definition {unquote(__MODULE__), :register_graphql_action}
       Module.register_attribute(__MODULE__, :graphql_actions, accumulate: true)
+      import unquote(__MODULE__), only: [variables: 1]
 
       @absinthe_schema unquote(schema)
 
@@ -237,6 +238,10 @@ defmodule Absinthe.Phoenix.Controller do
       defoverridable [absinthe_pipeline: 2]
 
     end
+  end
+
+  def variables(conn) do
+    conn.private[:absinthe_variables]
   end
 
   def default_pipeline(schema, options) do
