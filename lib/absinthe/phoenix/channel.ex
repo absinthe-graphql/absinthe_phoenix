@@ -15,8 +15,8 @@ defmodule Absinthe.Phoenix.Channel do
 
   @doc false
   def join("__absinthe__:control", _, socket) do
-
     schema = socket.assigns[:__absinthe_schema__]
+    pipeline = socket.assigns[:__absinthe_pipeline__]
 
     absinthe_config = Map.get(socket.assigns, :absinthe, %{})
 
@@ -30,6 +30,8 @@ defmodule Absinthe.Phoenix.Channel do
     absinthe_config =
       put_in(absinthe_config[:opts], opts)
       |> Map.update(:schema, schema, &(&1))
+
+    absinthe_config = Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -52,7 +54,9 @@ defmodule Absinthe.Phoenix.Channel do
       opts,
     })
 
-    {reply, socket} = case run(query, config.schema, opts) do
+    pipeline = Map.get(config, :pipeline)
+
+    {reply, socket} = case run(query, config.schema, pipeline, opts) do
       {:ok, %{"subscribed" => topic}, context} ->
         :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
           fastlane: {socket.transport_pid, socket.serializer, []},
@@ -81,12 +85,9 @@ defmodule Absinthe.Phoenix.Channel do
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
 
-  defp run(document, schema, options) do
-    pipeline =
-      schema
-      |> Absinthe.Pipeline.for_document(options)
-
-    case Absinthe.Pipeline.run(document, pipeline) do
+  defp run(document, schema, pipeline, options) do
+    {module, fun} = pipeline
+    case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
       {:error, msg, _phases} ->
@@ -94,4 +95,9 @@ defmodule Absinthe.Phoenix.Channel do
     end
   end
 
+  @doc false
+  def default_pipeline(schema, options) do
+    schema
+    |> Absinthe.Pipeline.for_document(options)
+  end
 end
