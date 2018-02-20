@@ -77,6 +77,14 @@ defmodule Absinthe.Phoenix.Channel do
         {reply, socket}
     end
 
+    Logger.debug(fn ->
+      """
+      -- Absinthe Phoenix Reply --
+      #{inspect reply}
+      ----------------------------
+      """
+    end)
+
     {:reply, reply, socket}
   end
   def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
