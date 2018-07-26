@@ -97,5 +97,13 @@ defmodule Schema do
         {:error, "unauthorized"}
       end
     end
+
+    field :prime, :string do
+      config fn _, %{context: %{pubsub: pubsub}} ->
+        {:ok, topic: "prime_topic", prime: fn ->
+          {:ok, ["prime1", "prime2"]}
+        end}
+      end
+    end
   end
 end
