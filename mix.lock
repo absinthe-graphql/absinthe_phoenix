@@ -1,5 +1,5 @@
 %{
-  "absinthe": {:hex, :absinthe, "1.5.0-alpha.4", "fa6dbd492db949a1193c57ddf9f382c55247082774b2b7ddd1bb44c4472e1a6b", [:mix], [{:dataloader, "~> 1.0.0", [hex: :dataloader, repo: "hexpm", optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}, {:nimble_parsec, "~> 0.4", [hex: :nimble_parsec, repo: "hexpm", optional: false]}], "hexpm"},
+  "absinthe": {:git, "https://github.com/hippware/absinthe.git", "1a57e68b43684f19a5f68cef8113425b117833b1", [branch: "defer-directive"]},
   "absinthe_plug": {:hex, :absinthe_plug, "1.5.0-alpha.0", "6b81b11cd4965b87a1519e3ba6693c84a6462c1992b5e0191ed532c77594a728", [:mix], [{:absinthe, "~> 1.5.0-alpha.0", [hex: :absinthe, repo: "hexpm", optional: false]}, {:plug, "~> 1.3.2 or ~> 1.4", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
   "decimal": {:hex, :decimal, "1.7.0", "30d6b52c88541f9a66637359ddf85016df9eb266170d53105f02e4a67e00c5aa", [:mix], [], "hexpm"},
   "earmark": {:hex, :earmark, "1.3.2", "b840562ea3d67795ffbb5bd88940b1bed0ed9fa32834915125ea7d02e35888a5", [:mix], [], "hexpm"},

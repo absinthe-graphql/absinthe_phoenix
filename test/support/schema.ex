@@ -27,6 +27,15 @@ defmodule Schema do
     field :age, :integer
   end
 
+  object :slow_field do
+    field :value, :integer do
+      resolve fn %{value: value}, _, _ ->
+        Process.sleep(value)
+        {:ok, value}
+      end
+    end
+  end
+
   query do
     field :me, :user do
       resolve fn _, %{context: context} ->
@@ -41,6 +50,12 @@ defmodule Schema do
         ]
 
         {:ok, users}
+      end
+    end
+    field :slow_field, :slow_field do
+      arg :delay, non_null(:integer)
+      resolve fn _, args, _ ->
+        {:ok, %{value: args.delay}}
       end
     end
   end
