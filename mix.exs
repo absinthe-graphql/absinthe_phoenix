@@ -24,8 +24,9 @@ defmodule Absinthe.Phoenix.Mixfile do
       maintainers: ["Ben Wilson", "Bruce Williams"],
       licenses: ["MIT"],
       links: %{
-        site: "http://absinthe-graphql.org",
-        github: "https://github.com/absinthe-graphql/absinthe_phoenix",
+        "Website": "https://absinthe-graphql.org",
+        "Changelog": "https://github.com/absinthe-graphql/absinthe_phoenix/blob/master/CHANGELOG.md", 
+        "GitHub": "https://github.com/absinthe-graphql/absinthe_phoenix"
       }
     ]
   end
