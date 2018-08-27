@@ -4,25 +4,29 @@ defmodule Absinthe.Phoenix.Mixfile do
   @version "1.4.3"
 
   def project do
-    [app: :absinthe_phoenix,
-     version: @version,
-     elixir: "~> 1.4",
-     elixirc_paths: elixirc_paths(Mix.env),
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     docs: [source_ref: "v#{@version}"],
-     package: package(),
-     deps: deps()]
+    [
+      app: :absinthe_phoenix,
+      version: @version,
+      elixir: "~> 1.4",
+      elixirc_paths: elixirc_paths(Mix.env),
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      docs: [source_ref: "v#{@version}"],
+      package: package(),
+      deps: deps()
+    ]
   end
 
   defp package do
-    [description: "Subscription support via Phoenix for Absinthe, the GraphQL implementation for Elixir.",
-     files: ["lib", "mix.exs", "README*"],
-     maintainers: ["Ben Wilson", "Bruce Williams"],
-     licenses: ["MIT"],
-     links: %{
-       site: "http://absinthe-graphql.org",
-       github: "https://github.com/absinthe-graphql/absinthe_phoenix",
+    [
+      description: "Subscription support via Phoenix for Absinthe, the GraphQL implementation for Elixir.",
+      files: ["lib", "mix.exs", "README*"],
+      maintainers: ["Ben Wilson", "Bruce Williams"],
+      licenses: ["MIT"],
+      links: %{
+        "Website": "https://absinthe-graphql.org",
+        "Changelog": "https://github.com/absinthe-graphql/absinthe_phoenix/blob/master/CHANGELOG.md", 
+        "GitHub": "https://github.com/absinthe-graphql/absinthe_phoenix"
       }
     ]
   end
