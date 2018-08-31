@@ -24,7 +24,7 @@ defmodule Absinthe.Phoenix.Channel do
       absinthe_config
       |> Map.get(:opts, [])
       |> Keyword.update(:context, %{pubsub: socket.endpoint}, fn context ->
-        Map.put(context, :pubsub, socket.endpoint)
+        Map.put_new(context, :pubsub, socket.endpoint)
       end)
 
     absinthe_config =
@@ -87,9 +87,17 @@ defmodule Absinthe.Phoenix.Channel do
 
     {:reply, reply, socket}
   end
+
   def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
+    pubsub =
+      socket.assigns
+      |> Map.get(:absinthe, %{})
+      |> Map.get(:opts, [])
+      |> Keyword.get(:context, %{})
+      |> Map.get(:pubsub, socket.endpoint)
+
     Phoenix.PubSub.unsubscribe(socket.pubsub_server, doc_id)
-    Absinthe.Subscription.unsubscribe(socket.endpoint, doc_id)
+    Absinthe.Subscription.unsubscribe(pubsub, doc_id)
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
 
