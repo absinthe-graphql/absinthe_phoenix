@@ -8,6 +8,9 @@ defmodule Absinthe.Phoenix.Endpoint do
 
   defmacro __before_compile__(_) do
     quote do
+      def node_name() do
+        Absinthe.Phoenix.Endpoint.node_name(@otp_app, __MODULE__)
+      end
       def publish_mutation(topic, mutation_result, subscribed_fields) do
         Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, mutation_result, subscribed_fields)
       end
@@ -15,6 +18,13 @@ defmodule Absinthe.Phoenix.Endpoint do
         Absinthe.Phoenix.Endpoint.publish_subscription(@otp_app, __MODULE__, topic, data)
       end
     end
+  end
+
+  @doc false
+  def node_name(otp_app, endpoint) do
+    pubsub = pubsub(otp_app, endpoint)
+
+    Phoenix.PubSub.node_name(pubsub)
   end
 
   @doc false
@@ -43,7 +53,7 @@ defmodule Absinthe.Phoenix.Endpoint do
     # This is because this broadcast will also be picked up by proxies within the
     # current node, and they need to be able to ignore this message.
     message = %{
-      node: node(),
+      node: node_name(otp_app, endpoint),
       subscribed_fields: subscribed_fields,
       mutation_result: mutation_result,
     }
