@@ -7,7 +7,7 @@ defmodule Absinthe.Phoenix.Socket do
 
       defmodule MyApp.Web.UserSocket do
         use Phoenix.Socket
-        use Absinthe.Phoenix.Socket
+        use Absinthe.Phoenix.Socket,
           schema: MyApp.Web.Schema
 
         transport :websocket, Phoenix.Transports.WebSocket
