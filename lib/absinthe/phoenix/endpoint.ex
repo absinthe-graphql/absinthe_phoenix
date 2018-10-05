@@ -11,9 +11,17 @@ defmodule Absinthe.Phoenix.Endpoint do
       def node_name() do
         Absinthe.Phoenix.Endpoint.node_name(@otp_app, __MODULE__)
       end
+
       def publish_mutation(topic, mutation_result, subscribed_fields) do
-        Absinthe.Phoenix.Endpoint.publish_mutation(@otp_app, __MODULE__, topic, mutation_result, subscribed_fields)
+        Absinthe.Phoenix.Endpoint.publish_mutation(
+          @otp_app,
+          __MODULE__,
+          topic,
+          mutation_result,
+          subscribed_fields
+        )
       end
+
       def publish_subscription(topic, data) do
         Absinthe.Phoenix.Endpoint.publish_subscription(@otp_app, __MODULE__, topic, data)
       end
@@ -37,7 +45,7 @@ defmodule Absinthe.Phoenix.Endpoint do
     broadcast = %Phoenix.Socket.Broadcast{
       topic: topic,
       event: "subscription:data",
-      payload: %{result: result, subscriptionId: topic},
+      payload: %{result: result, subscriptionId: topic}
     }
 
     pubsub
@@ -55,15 +63,16 @@ defmodule Absinthe.Phoenix.Endpoint do
     message = %{
       node: node_name(otp_app, endpoint),
       subscribed_fields: subscribed_fields,
-      mutation_result: mutation_result,
+      mutation_result: mutation_result
     }
 
     Phoenix.PubSub.broadcast(pubsub, proxy_topic, message)
   end
 
   defp pubsub(otp_app, endpoint) do
-    Application.get_env(otp_app, endpoint)[:pubsub][:name] || raise """
-    Pubsub needs to be configured for #{inspect otp_app} #{inspect endpoint}!
-    """
+    Application.get_env(otp_app, endpoint)[:pubsub][:name] ||
+      raise """
+      Pubsub needs to be configured for #{inspect(otp_app)} #{inspect(endpoint)}!
+      """
   end
 end
