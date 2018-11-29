@@ -1,4 +1,6 @@
 # The directory Mix will write compiled artifacts to.
+.elixir_ls
+
 /_build
 
 # If you run "mix test --cover", coverage assets end up here.

@@ -2,18 +2,20 @@ defmodule Absinthe.Phoenix.TestEndpoint do
   use Phoenix.Endpoint, otp_app: :absinthe_phoenix
   use Absinthe.Phoenix.Endpoint
 
-  socket "/socket", Absinthe.Phoenix.TestSocket
+  socket("/socket", Absinthe.Phoenix.TestSocket)
 
-  plug Plug.RequestId
-  plug Plug.Logger
+  plug(Plug.RequestId)
+  plug(Plug.Logger)
 
-  plug Plug.Parsers,
+  plug(
+    Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    json_decoder: Poison
+    json_decoder: Jason
+  )
 
-  plug Plug.MethodOverride
-  plug Plug.Head
+  plug(Plug.MethodOverride)
+  plug(Plug.Head)
 
   def init(_key, config) do
     if config[:load_from_system_env] do

@@ -32,11 +32,14 @@ defmodule Absinthe.Phoenix.Socket do
     pipeline = Keyword.get(opts, :pipeline)
 
     quote do
-      channel "__absinthe__:*", Absinthe.Phoenix.Channel,
+      channel(
+        "__absinthe__:*",
+        Absinthe.Phoenix.Channel,
         assigns: %{
           __absinthe_schema__: unquote(schema),
           __absinthe_pipeline__: unquote(pipeline)
         }
+      )
     end
   end
 
@@ -59,7 +62,7 @@ defmodule Absinthe.Phoenix.Socket do
   end
   ```
   """
-  @spec put_options(Phoenix.Socket.t, Absinthe.run_opts) :: Phoenix.Socket.t
+  @spec put_options(Phoenix.Socket.t(), Absinthe.run_opts()) :: Phoenix.Socket.t()
   def put_options(socket, opts) do
     absinthe_assigns =
       socket.assigns
@@ -82,7 +85,7 @@ defmodule Absinthe.Phoenix.Socket do
 
 
   """
-  @spec put_schema(Phoenix.Socket.t, Absinthe.Schema.t) :: Phoenix.Socket.t
+  @spec put_schema(Phoenix.Socket.t(), Absinthe.Schema.t()) :: Phoenix.Socket.t()
   def put_schema(socket, schema) do
     absinthe_assigns =
       socket.assigns

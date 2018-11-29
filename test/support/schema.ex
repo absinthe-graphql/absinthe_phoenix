@@ -33,11 +33,13 @@ defmodule Schema do
         {:ok, context[:current_user]}
       end
     end
+
     field :users, list_of(:user) do
       resolve fn _, _ ->
         users = [
           %{name: "Bob", age: 29}
         ]
+
         {:ok, users}
       end
     end
@@ -49,6 +51,7 @@ defmodule Schema do
     field :login, :user do
       middleware fn res, _ ->
         user = %{name: "Ben"}
+
         res
         |> Map.update!(:context, &Map.put(&1, :current_user, user))
         |> Absinthe.Resolution.put_result({:ok, user})
@@ -62,9 +65,10 @@ defmodule Schema do
         {:ok, topic: ""}
       end
 
-      trigger :add_comment, topic: fn _comment ->
-        ""
-      end
+      trigger :add_comment,
+        topic: fn _comment ->
+          ""
+        end
     end
 
     field :raises, :comment do
@@ -72,9 +76,10 @@ defmodule Schema do
         {:ok, topic: "raise"}
       end
 
-      trigger :add_comment, topic: fn comment ->
-        comment.contents
-      end
+      trigger :add_comment,
+        topic: fn comment ->
+          comment.contents
+        end
 
       resolve fn _, _ -> raise "boom" end
     end

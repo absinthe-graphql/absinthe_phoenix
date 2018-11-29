@@ -29,9 +29,10 @@ defmodule Absinthe.Phoenix.Channel do
 
     absinthe_config =
       put_in(absinthe_config[:opts], opts)
-      |> Map.update(:schema, schema, &(&1))
+      |> Map.update(:schema, schema, & &1)
 
-    absinthe_config = Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
+    absinthe_config =
+      Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -51,36 +52,41 @@ defmodule Absinthe.Phoenix.Channel do
       query,
       config.schema,
       [],
-      opts,
+      opts
     })
 
     pipeline = Map.get(config, :pipeline)
 
-    {reply, socket} = case run(query, config.schema, pipeline, opts) do
-      {:ok, %{"subscribed" => topic}, context} ->
-        :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
-          fastlane: {socket.transport_pid, socket.serializer, []},
-          link: true,
-        ])
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:ok, %{subscriptionId: topic}}, socket}
+    {reply, socket} =
+      case run(query, config.schema, pipeline, opts) do
+        {:ok, %{"subscribed" => topic}, context} ->
+          :ok =
+            Phoenix.PubSub.subscribe(
+              socket.pubsub_server,
+              topic,
+              fastlane: {socket.transport_pid, socket.serializer, []},
+              link: true
+            )
 
-      {:ok, %{data: _} = reply, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:ok, reply}, socket}
+          socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+          {{:ok, %{subscriptionId: topic}}, socket}
 
-      {:ok, %{errors: _} = reply, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:error, reply}, socket}
+        {:ok, %{data: _} = reply, context} ->
+          socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+          {{:ok, reply}, socket}
 
-      {:error, reply} ->
-        {reply, socket}
-    end
+        {:ok, %{errors: _} = reply, context} ->
+          socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+          {{:error, reply}, socket}
+
+        {:error, reply} ->
+          {reply, socket}
+      end
 
     Logger.debug(fn ->
       """
       -- Absinthe Phoenix Reply --
-      #{inspect reply}
+      #{inspect(reply)}
       ----------------------------
       """
     end)
@@ -103,9 +109,11 @@ defmodule Absinthe.Phoenix.Channel do
 
   defp run(document, schema, pipeline, options) do
     {module, fun} = pipeline
+
     case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
+
       {:error, msg, _phases} ->
         {:error, msg}
     end

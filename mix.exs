@@ -26,8 +26,7 @@ defmodule Absinthe.Phoenix.Mixfile do
       licenses: ["MIT"],
       links: %{
         Website: "https://absinthe-graphql.org",
-        Changelog:
-          "https://github.com/absinthe-graphql/absinthe_phoenix/blob/master/CHANGELOG.md",
+        Changelog: "https://github.com/absinthe-graphql/absinthe_phoenix/blob/master/CHANGELOG.md",
         GitHub: "https://github.com/absinthe-graphql/absinthe_phoenix"
       }
     ]
@@ -43,13 +42,13 @@ defmodule Absinthe.Phoenix.Mixfile do
   defp deps do
     [
       {:absinthe_plug, "~> 1.4.0"},
-      {:absinthe, "~> 1.4.0"},
+      {:absinthe, "~> 1.4.0 or ~> 1.5.0-alpha.0"},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.2"},
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_html, "~> 2.10.5 or ~> 2.11", optional: true},
       {:ex_doc, "~> 0.14", only: :dev},
-      {:poison, "~> 2.0 or ~> 3.0", only: [:dev, :test]}
+      {:jason, "~> 1.0", only: [:dev, :test]}
     ]
   end
 end

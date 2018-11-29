@@ -3,7 +3,7 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   Convenience functions for subscription tests
   """
 
-  defmacro __using__([schema: schema]) do
+  defmacro __using__(schema: schema) do
     quote do
       setup_all do
         Absinthe.Test.prime(unquote(schema))
@@ -14,15 +14,16 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   end
 
   def join_absinthe(socket) do
-    with {:ok, _, socket} <- Phoenix.ChannelTest.subscribe_and_join(socket, "__absinthe__:control", %{}) do
+    with {:ok, _, socket} <-
+           Phoenix.ChannelTest.subscribe_and_join(socket, "__absinthe__:control", %{}) do
       {:ok, socket}
     end
   end
 
   def push_doc(socket, doc, opts \\ []) do
-    Phoenix.ChannelTest.push socket, "doc", %{
+    Phoenix.ChannelTest.push(socket, "doc", %{
       "query" => doc,
-      "variables" => opts[:variables],
-    }
+      "variables" => opts[:variables]
+    })
   end
 end
