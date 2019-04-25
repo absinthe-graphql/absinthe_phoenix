@@ -1,3 +1,7 @@
+# v1.4.4
+
+- Remove unintentional poison dependency
+
 # v1.4.2
 
 - Add `variables/1` function to make it easy to get the original parameters
