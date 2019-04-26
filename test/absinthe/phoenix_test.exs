@@ -188,4 +188,34 @@ defmodule Absinthe.PhoenixTest do
              ]
            }
   end
+
+  test "valid variables succeed", %{socket: socket} do
+    ref =
+      push(socket, "doc", %{
+        "query" => "mutation ($val: Int) {mutate (val: $val)}",
+        "variables" => %{val: 5}
+      })
+
+    assert_reply(ref, :ok, reply)
+
+    assert reply == %{
+             data: %{"mutate" => 5}
+           }
+  end
+
+  test "inavlid variables returns error", %{socket: socket} do
+    ref =
+      push(socket, "doc", %{
+        "query" => "mutation ($val: Int) {mutate (val: $val)}",
+        "variables" => [val: 5]
+      })
+
+    assert_reply(ref, :error, reply)
+
+    assert reply == %{
+      error: "Could not parse variables as map"
+    }
+  end
+
+
 end
