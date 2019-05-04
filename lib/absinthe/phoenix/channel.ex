@@ -131,4 +131,8 @@ defmodule Absinthe.Phoenix.Channel do
     schema
     |> Absinthe.Pipeline.for_document(options)
   end
+
+  def handle_info(_, state) do
+    {:noreply, state}
+  end
 end
