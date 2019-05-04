@@ -57,6 +57,13 @@ defmodule Schema do
         |> Absinthe.Resolution.put_result({:ok, user})
       end
     end
+
+    field :mutate, :integer do
+      arg :val, :integer
+      resolve fn _, %{val: val}, _ ->
+        {:ok, val}
+      end
+    end
   end
 
   subscription do
