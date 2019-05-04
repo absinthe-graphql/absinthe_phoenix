@@ -201,7 +201,8 @@ defmodule Absinthe.Phoenix.Controller do
         end
       end
 
-      def cast_param(value, %Absinthe.Type.InputObject{} = target_type, schema) when is_map(value) do
+      def cast_param(value, %Absinthe.Type.InputObject{} = target_type, schema)
+          when is_map(value) do
         for {name, field_value} <- value, into: %{} do
           case Map.values(target_type.fields) |> Enum.find(&(to_string(&1.identifier) == name)) do
             nil ->
@@ -219,7 +220,7 @@ defmodule Absinthe.Phoenix.Controller do
 
       def cast_param(
             value,
-            %Absinthe.Type.Scalar{__reference__: %{identifier: :integer}},
+            %Absinthe.Type.Scalar{identifier: :integer},
             _schema
           )
           when is_binary(value) do
@@ -233,7 +234,7 @@ defmodule Absinthe.Phoenix.Controller do
         end
       end
 
-      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :float}}, _schema)
+      def cast_param(value, %Absinthe.Type.Scalar{identifier: :float}, _schema)
           when is_binary(value) do
         case Float.parse(value) do
           {result, _} ->

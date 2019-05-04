@@ -43,18 +43,17 @@ defmodule Absinthe.Phoenix.Controller.Action do
   end
 
   @impl Plug
-  @spec call(conn :: Plug.Conn.t(), opts :: Keyword.t()) :: Plug.Conn.t()
   def call(conn, config) do
     controller = conn.private.phoenix_controller
     document_provider = Module.safe_concat(controller, GraphQL)
     config = update_config(conn, config)
 
     case document_and_schema(conn, document_provider) do
-      {doc, schema} when is_nil(doc) or is_nil(schema) ->
-        conn
-
-      {document, schema} ->
+      {document, schema} when not is_nil(document) and not is_nil(schema) ->
         execute(conn, schema, controller, document, config)
+
+      _ ->
+        conn
     end
   end
 
@@ -113,7 +112,7 @@ defmodule Absinthe.Phoenix.Controller.Action do
   defp document_and_schema(conn, document_provider) do
     case document_key(conn) do
       nil ->
-        nil
+        {nil, nil}
 
       key ->
         {
@@ -130,23 +129,11 @@ defmodule Absinthe.Phoenix.Controller.Action do
     controller.absinthe_pipeline(schema, options)
   end
 
-  @spec parse_variables(
-          document :: Absinthe.Blueprint.t(),
-          params :: map,
-          schema :: Absinthe.Schema.t(),
-          controller :: module
-        ) :: %{String.t() => any}
   defp parse_variables(document, params, schema, controller) do
-    params
-    |> do_parse_variables(variable_types(document, schema), schema, controller)
+    types = variable_types(document, schema)
+    do_parse_variables(params, types, schema, controller)
   end
 
-  @spec do_parse_variables(
-          params :: map,
-          variable_types :: %{String.t() => Absinthe.Type.t()},
-          schema :: Absinthe.Schema.t(),
-          controller :: module
-        ) :: map
   defp do_parse_variables(params, variable_types, schema, controller) do
     for {name, raw_value} <- params, target_type = Map.get(variable_types, name), into: %{} do
       {
@@ -175,10 +162,6 @@ defmodule Absinthe.Phoenix.Controller.Action do
     end
   end
 
-  # TODO: Extract this to a function (probably on Absinthe.Blueprint.Document.Operation)
-  @spec variable_types(Absinthe.Blueprint.t(), Absinthe.Schema.t()) :: %{
-          String.t() => Absinthe.Type.t()
-        }
   defp variable_types(document, schema) do
     for %{name: name, type: type} <-
           Absinthe.Blueprint.current_operation(document).variable_definitions,

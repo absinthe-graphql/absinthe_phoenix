@@ -4,8 +4,8 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   """
 
   @typep opts ::
-    [variables: Access.containter()] | %{variables: Access.container()} |
-    %_{variables: Access.container()}
+           [variables: Access.containter()]
+           | %{variables: Access.container()}
 
   defmacro __using__(schema: schema) do
     quote do
@@ -32,9 +32,9 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   """
   @spec push_doc(Phoenix.Socket.t(), String.t(), opts) :: reference()
   def push_doc(socket, query, opts \\ []) do
-    Phoenix.ChannelTest.push socket, "doc", %{
+    Phoenix.ChannelTest.push(socket, "doc", %{
       "query" => query,
-      "variables" => opts[:variables],
-    }
+      "variables" => opts[:variables]
+    })
   end
 end

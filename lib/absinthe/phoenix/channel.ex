@@ -64,11 +64,11 @@ defmodule Absinthe.Phoenix.Channel do
         """
       end)
 
-         if reply != :noreply do
-           {:reply, reply, socket}
-         else
-           {:noreply, socket}
-         end
+      if reply != :noreply do
+        {:reply, reply, socket}
+      else
+        {:noreply, socket}
+      end
     else
       _ -> {:reply, {:error, %{error: "Could not parse variables as map"}}, socket}
     end

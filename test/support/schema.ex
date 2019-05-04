@@ -60,6 +60,7 @@ defmodule Schema do
 
     field :mutate, :integer do
       arg :val, :integer
+
       resolve fn _, %{val: val}, _ ->
         {:ok, val}
       end
