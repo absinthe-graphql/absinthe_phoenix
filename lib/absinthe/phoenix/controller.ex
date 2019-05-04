@@ -172,6 +172,7 @@ defmodule Absinthe.Phoenix.Controller do
 
   defmacro __using__(opts \\ []) do
     schema = Keyword.fetch!(opts, :schema)
+
     quote do
       @behaviour unquote(__MODULE__)
       @before_compile unquote(__MODULE__)
@@ -181,24 +182,32 @@ defmodule Absinthe.Phoenix.Controller do
 
       @absinthe_schema unquote(schema)
 
-      plug unquote(__MODULE__).Action, unquote(opts)
+      plug(unquote(__MODULE__).Action, unquote(opts))
 
       @impl unquote(__MODULE__)
-      @spec cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
+      @spec cast_param(
+              value :: any,
+              target_type :: Absinthe.Type.t(),
+              schema :: Absinthe.Schema.t()
+            ) :: any
       def cast_param(value, %Absinthe.Type.NonNull{of_type: inner_target_type}, schema) do
         cast_param(value, inner_target_type, schema)
       end
-      def cast_param(values, %Absinthe.Type.List{of_type: inner_target_type}, schema) when is_list(values) do
+
+      def cast_param(values, %Absinthe.Type.List{of_type: inner_target_type}, schema)
+          when is_list(values) do
         for value <- values do
           cast_param(value, inner_target_type, schema)
         end
       end
+
       def cast_param(value, %Absinthe.Type.InputObject{} = target_type, schema) when is_map(value) do
         for {name, field_value} <- value, into: %{} do
           case Map.values(target_type.fields) |> Enum.find(&(to_string(&1.identifier) == name)) do
             nil ->
               # Pass through value for error reporting by validations
               {name, field_value}
+
             field ->
               {
                 name,
@@ -207,36 +216,48 @@ defmodule Absinthe.Phoenix.Controller do
           end
         end
       end
-      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :integer}}, _schema) when is_binary(value) do
+
+      def cast_param(
+            value,
+            %Absinthe.Type.Scalar{__reference__: %{identifier: :integer}},
+            _schema
+          )
+          when is_binary(value) do
         case Integer.parse(value) do
           {result, _} ->
             result
+
           :error ->
             # Pass through value for error reporting by validations
             value
         end
       end
-      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :float}}, _schema) when is_binary(value) do
+
+      def cast_param(value, %Absinthe.Type.Scalar{__reference__: %{identifier: :float}}, _schema)
+          when is_binary(value) do
         case Float.parse(value) do
           {result, _} ->
             result
+
           :error ->
             # Pass through value for error reporting by validations
             value
         end
       end
+
       def cast_param(value, target_type, schema) do
         value
       end
-      defoverridable [cast_param: 3]
+
+      defoverridable cast_param: 3
 
       @impl unquote(__MODULE__)
-      @spec absinthe_pipeline(schema :: Absinthe.Schema.t, Keyword.t) :: Absinthe.Pipeline.t
+      @spec absinthe_pipeline(schema :: Absinthe.Schema.t(), Keyword.t()) :: Absinthe.Pipeline.t()
       def absinthe_pipeline(schema, opts) do
         unquote(__MODULE__).default_pipeline(schema, opts)
       end
-      defoverridable [absinthe_pipeline: 2]
 
+      defoverridable absinthe_pipeline: 2
     end
   end
 
@@ -251,45 +272,53 @@ defmodule Absinthe.Phoenix.Controller do
     schema
     |> Pipeline.for_document(options)
     |> Pipeline.from(Phase.Document.Variables)
-    |> Pipeline.insert_before(Phase.Document.Variables, {Absinthe.Phoenix.Controller.Blueprint, options})
+    |> Pipeline.insert_before(
+      Phase.Document.Variables,
+      {Absinthe.Phoenix.Controller.Blueprint, options}
+    )
     |> Pipeline.without(Phase.Document.Validation.ScalarLeafs)
-    |> Pipeline.insert_after(Phase.Document.Directives, {Absinthe.Phoenix.Controller.Action, options})
+    |> Pipeline.insert_after(
+      Phase.Document.Directives,
+      {Absinthe.Phoenix.Controller.Action, options}
+    )
   end
 
   defmacro __before_compile__(env) do
     actions = Module.get_attribute(env.module, :graphql_actions)
     provides = for {name, doc, _} <- actions, do: {name, doc}
     schemas = for {name, _, schema} <- actions, do: {to_string(name), schema}
-    quote do
 
+    quote do
       defmodule GraphQL do
         use Absinthe.Plug.DocumentProvider.Compiled
-        provide unquote(provides)
+        provide(unquote(provides))
 
         @absinthe_schemas %{unquote_splicing(schemas)}
         def lookup_schema(name) do
           @absinthe_schemas[name]
         end
-
       end
-
     end
   end
 
   @doc false
   def register_graphql_action(env, :def, name, _args, _guards, _body) do
     default_schema = Module.get_attribute(env.module, :absinthe_schema)
+
     case Module.get_attribute(env.module, :graphql) do
       nil ->
         :ok
+
       {document, schema} ->
         Module.delete_attribute(env.module, :graphql)
         Module.put_attribute(env.module, :graphql_actions, {name, document, schema})
+
       document ->
         Module.delete_attribute(env.module, :graphql)
         Module.put_attribute(env.module, :graphql_actions, {name, document, default_schema})
     end
   end
+
   def register_graphql_action(_env, _kind, _name, _args, _guards, _body) do
     :ok
   end
@@ -317,7 +346,11 @@ defmodule Absinthe.Phoenix.Controller do
   unchanged so that Absinthe's usual validation logic can report it as
   invalid.
   """
-  @callback cast_param(value :: any, target_type :: Absinthe.Type.t, schema :: Absinthe.Schema.t) :: any
+  @callback cast_param(
+              value :: any,
+              target_type :: Absinthe.Type.t(),
+              schema :: Absinthe.Schema.t()
+            ) :: any
 
   @doc """
   Customize the Absinthe processing pipeline.
@@ -325,6 +358,5 @@ defmodule Absinthe.Phoenix.Controller do
   Only implement this function if you need to change the pipeline used
   to process documents.
   """
-  @callback absinthe_pipeline(schema :: Absinthe.Schema.t, Keyword.t) :: Absinthe.Pipeline.t
-
+  @callback absinthe_pipeline(schema :: Absinthe.Schema.t(), Keyword.t()) :: Absinthe.Pipeline.t()
 end

@@ -41,7 +41,7 @@ line:
 
 Where `MyAppWeb.Endpoint` is the name of your application's phoenix endpoint.
 
-In your `MyApp.Web.Endpoint` module add:
+In your `MyAppWeb.Endpoint` module add:
 ```elixir
 use Absinthe.Phoenix.Endpoint
 ```
@@ -68,7 +68,7 @@ Where `MyAppWeb.Schema` is the name of your Absinthe schema module.
 
 That is all that's required for setup on the server.
 
-For client side guidance see the guides
+For client side guidance see the guides.
 
 ## GraphiQL Usage
 

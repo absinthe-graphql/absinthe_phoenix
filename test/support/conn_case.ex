@@ -1,5 +1,4 @@
 defmodule Absinthe.Phoenix.ConnCase do
-
   use ExUnit.CaseTemplate
 
   using do
@@ -8,5 +7,4 @@ defmodule Absinthe.Phoenix.ConnCase do
       @endpoint Absinthe.Phoenix.TestEndpoint
     end
   end
-
 end

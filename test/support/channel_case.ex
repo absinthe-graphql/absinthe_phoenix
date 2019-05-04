@@ -10,5 +10,4 @@ defmodule Absinthe.Phoenix.ChannelCase do
       @endpoint Absinthe.Phoenix.TestEndpoint
     end
   end
-
 end

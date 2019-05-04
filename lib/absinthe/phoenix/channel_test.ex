@@ -7,7 +7,7 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
     [variables: Access.containter()] | %{variables: Access.container()} |
     %_{variables: Access.container()}
 
-  defmacro __using__([schema: schema]) do
+  defmacro __using__(schema: schema) do
     quote do
       setup_all do
         Absinthe.Test.prime(unquote(schema))
@@ -18,7 +18,8 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   end
 
   def join_absinthe(socket) do
-    with {:ok, _, socket} <- Phoenix.ChannelTest.subscribe_and_join(socket, "__absinthe__:control", %{}) do
+    with {:ok, _, socket} <-
+           Phoenix.ChannelTest.subscribe_and_join(socket, "__absinthe__:control", %{}) do
       {:ok, socket}
     end
   end

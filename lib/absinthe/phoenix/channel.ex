@@ -29,9 +29,10 @@ defmodule Absinthe.Phoenix.Channel do
 
     absinthe_config =
       put_in(absinthe_config[:opts], opts)
-      |> Map.update(:schema, schema, &(&1))
+      |> Map.update(:schema, schema, & &1)
 
-    absinthe_config = Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
+    absinthe_config =
+      Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -41,51 +42,36 @@ defmodule Absinthe.Phoenix.Channel do
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
 
-    opts =
-      config.opts
-      |> Keyword.put(:variables, Map.get(payload, "variables", %{}))
+    with variables when is_map(variables) <- Map.get(payload, "variables", %{}) do
+      opts = Keyword.put(config.opts, :variables, variables)
 
-    query = Map.get(payload, "query", "")
+      query = Map.get(payload, "query", "")
 
-    Absinthe.Logger.log_run(:debug, {
-      query,
-      config.schema,
-      [],
-      opts,
-    })
+      Absinthe.Logger.log_run(:debug, {
+        query,
+        config.schema,
+        [],
+        opts
+      })
 
-    pipeline = Map.get(config, :pipeline)
+      {reply, socket} = run_doc(socket, query, config, opts)
 
-    {reply, socket} = case run(query, config.schema, pipeline, opts) do
-      {:ok, %{"subscribed" => topic}, context} ->
-        :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
-          fastlane: {socket.transport_pid, socket.serializer, []},
-          link: true,
-        ])
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:ok, %{subscriptionId: topic}}, socket}
+      Logger.debug(fn ->
+        """
+        -- Absinthe Phoenix Reply --
+        #{inspect(reply)}
+        ----------------------------
+        """
+      end)
 
-      {:ok, %{data: _} = reply, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:ok, reply}, socket}
-
-      {:ok, %{errors: _} = reply, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-        {{:error, reply}, socket}
-
-      {:error, reply} ->
-        {reply, socket}
+         if reply != :noreply do
+           {:reply, reply, socket}
+         else
+           {:noreply, socket}
+         end
+    else
+      _ -> {:reply, {:error, %{error: "Could not parse variables as map"}}, socket}
     end
-
-    Logger.debug(fn ->
-      """
-      -- Absinthe Phoenix Reply --
-      #{inspect reply}
-      ----------------------------
-      """
-    end)
-
-    {:reply, reply, socket}
   end
 
   def handle_in("unsubscribe", %{"subscriptionId" => doc_id}, socket) do
@@ -101,11 +87,40 @@ defmodule Absinthe.Phoenix.Channel do
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
 
+  defp run_doc(socket, query, config, opts) do
+    case run(query, config[:schema], config[:pipeline], opts) do
+      {:ok, %{"subscribed" => topic}, context} ->
+        :ok =
+          Phoenix.PubSub.subscribe(
+            socket.pubsub_server,
+            topic,
+            fastlane: {socket.transport_pid, socket.serializer, []},
+            link: true
+          )
+
+        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+        {{:ok, %{subscriptionId: topic}}, socket}
+
+      {:ok, %{data: _} = reply, context} ->
+        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+        {{:ok, reply}, socket}
+
+      {:ok, %{errors: _} = reply, context} ->
+        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+        {{:error, reply}, socket}
+
+      {:error, reply} ->
+        {reply, socket}
+    end
+  end
+
   defp run(document, schema, pipeline, options) do
     {module, fun} = pipeline
+
     case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
+
       {:error, msg, _phases} ->
         {:error, msg}
     end
