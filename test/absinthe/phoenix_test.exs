@@ -14,7 +14,7 @@ defmodule Absinthe.PhoenixTest do
 
   setup do
     {:ok, _, socket} =
-      socket(nil, absinthe: %{schema: Schema, opts: []})
+      socket(Absinthe.Phoenix.TestSocket, nil, absinthe: %{schema: Schema, opts: []})
       |> subscribe_and_join(Absinthe.Phoenix.Channel, "__absinthe__:control")
 
     {:ok, socket: socket}
