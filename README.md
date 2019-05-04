@@ -1,6 +1,7 @@
 # Absinthe.Phoenix
 
 [![Hex pm](http://img.shields.io/hexpm/v/absinthe_phoenix.svg?style=flat)](https://hex.pm/packages/absinthe_phoenix)[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/absinthe-graphql/absinthe_phoenix.svg?branch=master)](https://travis-ci.org/absinthe-graphql/absinthe_phoenix)
 
 This package integrates Absinthe subscriptions with Phoenix, so that you can use subscriptions via websockets.
 
