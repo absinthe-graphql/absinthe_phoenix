@@ -34,7 +34,7 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   def push_doc(socket, query, opts \\ []) do
     Phoenix.ChannelTest.push(socket, "doc", %{
       "query" => query,
-      "variables" => opts[:variables]
+      "variables" => opts[:variables] || %{}
     })
   end
 end
