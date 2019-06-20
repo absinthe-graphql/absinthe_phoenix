@@ -39,6 +39,24 @@ line:
   # other children ...
 ]
 ```
+In Phoenix v1.4, the supervisor children are mounted like so:
+
+```elixir
+# List all child processes to be supervised
+    children = [
+      # Start the Ecto repository
+      MyAppWeb.Repo,
+      # Start the endpoint when the application starts
+      MyAppWeb.Endpoint,
+      {Absinthe.Subscription, [MyAppWeb.Endpoint]}
+    ]
+
+    # See https://hexdocs.pm/elixir/Supervisor.html
+    # for other strategies and supported options
+    opts = [strategy: :one_for_one, name: MyAppWeb.Supervisor]
+    Supervisor.start_link(children, opts)
+
+```
 
 Where `MyAppWeb.Endpoint` is the name of your application's phoenix endpoint.
 
