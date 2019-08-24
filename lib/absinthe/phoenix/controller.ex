@@ -4,12 +4,13 @@ defmodule Absinthe.Phoenix.Controller do
 
   ## Example
 
-  First, `use Absinthe.Phoenix.Controller`, passing your `schema`:
+  First, `use Absinthe.Phoenix.Controller`, passing your `schema` and
+  notifying Absinthe to operate in `internal` mode:
 
   ```elixir
   defmodule MyAppWeb.UserController do
     use MyAppWeb, :controller
-    use Absinthe.Phoenix.Controller, schema: MyAppWeb.Schema
+    use Absinthe.Phoenix.Controller, schema: MyAppWeb.Schema, action: [mode: :internal]
 
     # ... actions
 
