@@ -216,4 +216,17 @@ defmodule Absinthe.PhoenixTest do
              error: "Could not parse variables as map"
            }
   end
+
+  test "defer", %{socket: socket} do
+    ref = push socket, "doc", %{"query" => "query { users { name @defer } }"}
+    assert_reply ref, :ok, %{queryId: id, data: data}
+    assert data == %{"users" => [%{}]}
+
+    assert_push "doc", reply
+    assert reply== %{
+      queryId: id,
+      data: "Bob",
+      path: ["users", 0, "name"]
+    }
+  end
 end
