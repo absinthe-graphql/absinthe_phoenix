@@ -4,7 +4,7 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
   """
 
   @typep opts ::
-           [variables: Access.containter()]
+           [variables: Access.container()]
            | %{variables: Access.container()}
 
   defmacro __using__(schema: schema) do
