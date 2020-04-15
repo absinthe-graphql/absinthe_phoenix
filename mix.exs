@@ -42,7 +42,7 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe_plug, "~> 1.5.0-rc.0"},
+      {:absinthe_plug, "~> 1.5.0-rc.2"},
       {:absinthe, "~> 1.5.0-rc.0"},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.4"},
