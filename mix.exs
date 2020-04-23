@@ -37,7 +37,10 @@ defmodule Absinthe.Phoenix.Mixfile do
   defp elixirc_paths(_), do: ["lib"]
 
   def application do
-    [extra_applications: [:logger]]
+    [
+      mod: {Absinthe.Phoenix.Application, []},
+      extra_applications: [:logger]
+    ]
   end
 
   defp deps do
@@ -45,8 +48,8 @@ defmodule Absinthe.Phoenix.Mixfile do
       {:absinthe_plug, "~> 1.5.0-rc.0"},
       {:absinthe, "~> 1.5.0-rc.0"},
       {:decimal, "~> 1.0"},
-      {:phoenix, "~> 1.4"},
-      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix, "~> 1.5"},
+      {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_html, "~> 2.13", optional: true},
       {:ex_doc, "~> 0.14", only: :dev},
       {:jason, "~> 1.0", only: [:dev, :test]}

@@ -15,7 +15,7 @@ Install from [Hex.pm](https://hex.pm/packages/absinthe_phoenix):
 
 ```elixir
 def deps do
-  [{:absinthe_phoenix, "~> 1.4.0"}]
+  [{:absinthe_phoenix, "~> 1.5.0"}]
 end
 ```
 
@@ -24,8 +24,7 @@ You need to have a working phoenix pubsub configured. Here is what the default l
 ```elixir
 config :my_app, MyAppWeb.Endpoint,
   # ... other config
-  pubsub: [name: MyApp.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub_server: MyApp.PubSub
 ```
 
 In your application supervisor add a line AFTER your existing endpoint supervision
@@ -43,6 +42,7 @@ line:
 Where `MyAppWeb.Endpoint` is the name of your application's phoenix endpoint.
 
 In your `MyAppWeb.Endpoint` module add:
+
 ```elixir
 use Absinthe.Phoenix.Endpoint
 ```
@@ -50,6 +50,7 @@ use Absinthe.Phoenix.Endpoint
 In your socket add:
 
 #### Phoenix 1.3
+
 ```elixir
 use Absinthe.Phoenix.Socket,
   schema: MyAppWeb.Schema
