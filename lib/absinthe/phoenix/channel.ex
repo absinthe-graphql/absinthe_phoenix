@@ -95,7 +95,7 @@ defmodule Absinthe.Phoenix.Channel do
 
         :ok =
           Phoenix.PubSub.subscribe(
-            socket.pubsub_server,
+            pubsub_server,
             topic,
             metadata: {:fastlane, transport_pid, serializer, []},
             link: true

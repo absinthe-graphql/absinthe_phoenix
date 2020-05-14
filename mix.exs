@@ -1,7 +1,7 @@
 defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
-  @version "1.5.0-rc.0"
+  @version "1.5.0"
 
   def project do
     [
@@ -42,8 +42,8 @@ defmodule Absinthe.Phoenix.Mixfile do
 
   defp deps do
     [
-      {:absinthe_plug, "~> 1.5.0-rc.0"},
-      {:absinthe, "~> 1.5.0-rc.0"},
+      {:absinthe_plug, "~> 1.5.0"},
+      {:absinthe, "~> 1.5.0"},
       {:decimal, "~> 1.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_pubsub, "~> 2.0"},
