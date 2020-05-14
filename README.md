@@ -9,13 +9,13 @@ For getting started guides on subscriptions see: https://hexdocs.pm/absinthe/sub
 
 For getting started guides on server side rendering see: https://hexdocs.pm/absinthe/subscriptions.html
 
-## Installation
+## Installation Phoenix 1.4
 
 Install from [Hex.pm](https://hex.pm/packages/absinthe_phoenix):
 
 ```elixir
 def deps do
-  [{:absinthe_phoenix, "~> 1.4.0"}]
+  [{:absinthe_phoenix, "~> 1.5.0"}]
 end
 ```
 
@@ -34,8 +34,8 @@ line:
 ```elixir
 [
   # other children ...
-  supervisor(MyAppWeb.Endpoint, []), # this line should already exist
-  supervisor(Absinthe.Subscription, [MyAppWeb.Endpoint]), # add this line
+  MyAppWeb.Endpoint, # this line should already exist
+  {Absinthe.Subscription, [MyAppWeb.Endpoint]}, # add this line
   # other children ...
 ]
 ```
@@ -49,20 +49,9 @@ use Absinthe.Phoenix.Endpoint
 
 In your socket add:
 
-#### Phoenix 1.3
 ```elixir
 use Absinthe.Phoenix.Socket,
   schema: MyAppWeb.Schema
-```
-
-#### Phoenix 1.2
-
-```elixir
-  use Absinthe.Phoenix.Socket
-  def connect(_params, socket) do
-    socket = Absinthe.Phoenix.Socket.put_schema(socket, MyAppWeb.Schema)
-    {:ok, socket}
-  end
 ```
 
 Where `MyAppWeb.Schema` is the name of your Absinthe schema module.
