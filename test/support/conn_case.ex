@@ -3,7 +3,9 @@ defmodule Absinthe.Phoenix.ConnCase do
 
   using do
     quote do
-      use Phoenix.ConnTest
+      import Plug.Conn
+      import Phoenix.ConnTest
+
       @endpoint Absinthe.Phoenix.TestEndpoint
     end
   end

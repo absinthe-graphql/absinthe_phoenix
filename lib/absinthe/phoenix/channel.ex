@@ -90,11 +90,14 @@ defmodule Absinthe.Phoenix.Channel do
   defp run_doc(socket, query, config, opts) do
     case run(query, config[:schema], config[:pipeline], opts) do
       {:ok, %{"subscribed" => topic}, context} ->
+        %{transport_pid: transport_pid, serializer: serializer, pubsub_server: pubsub_server} =
+          socket
+
         :ok =
           Phoenix.PubSub.subscribe(
             socket.pubsub_server,
             topic,
-            fastlane: {socket.transport_pid, socket.serializer, []},
+            metadata: {:fastlane, transport_pid, serializer, []},
             link: true
           )
 

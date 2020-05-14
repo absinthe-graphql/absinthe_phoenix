@@ -7,8 +7,13 @@ defmodule Absinthe.PhoenixTest do
   setup_all do
     Absinthe.Test.prime(Schema)
 
-    {:ok, _} = Absinthe.Phoenix.TestEndpoint.start_link()
-    {:ok, _} = Absinthe.Subscription.start_link(Absinthe.Phoenix.TestEndpoint)
+    children = [
+      {Phoenix.PubSub, [name: Absinthe.Phoenix.PubSub, adapter: Phoenix.PubSub.PG2]},
+      Absinthe.Phoenix.TestEndpoint,
+      {Absinthe.Subscription, Absinthe.Phoenix.TestEndpoint}
+    ]
+
+    {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
     :ok
   end
 

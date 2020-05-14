@@ -48,9 +48,7 @@ defmodule Absinthe.Phoenix.Endpoint do
       payload: %{result: result, subscriptionId: topic}
     }
 
-    pubsub
-    |> Phoenix.PubSub.node_name()
-    |> Phoenix.PubSub.direct_broadcast(pubsub, topic, broadcast)
+    Phoenix.PubSub.local_broadcast(pubsub, topic, broadcast, Phoenix.Channel.Server)
   end
 
   @doc false
@@ -66,11 +64,15 @@ defmodule Absinthe.Phoenix.Endpoint do
       mutation_result: mutation_result
     }
 
-    Phoenix.PubSub.broadcast(pubsub, proxy_topic, message)
+    Phoenix.PubSub.broadcast(pubsub, proxy_topic, message, Phoenix.Channel.Server)
   end
 
   defp pubsub(otp_app, endpoint) do
-    Application.get_env(otp_app, endpoint)[:pubsub][:name] ||
+    pubsub =
+      Application.get_env(otp_app, endpoint)[:pubsub][:name] ||
+        Application.get_env(otp_app, endpoint)[:pubsub_server]
+
+    pubsub ||
       raise """
       Pubsub needs to be configured for #{inspect(otp_app)} #{inspect(endpoint)}!
       """
