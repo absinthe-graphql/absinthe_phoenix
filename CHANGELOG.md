@@ -1,3 +1,11 @@
+# v2.0.0
+
+- Phoenix.PubSub 2.0 support
+
+# v1.5.0
+
+- Absinthe 1.5 support
+
 # v1.4.4
 
 - Remove unintentional poison dependency
