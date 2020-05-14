@@ -13,9 +13,13 @@ For getting started guides on server side rendering see: https://hexdocs.pm/absi
 
 Install from [Hex.pm](https://hex.pm/packages/absinthe_phoenix):
 
+For Phoenix 1.4, see the v1.5 branch: https://github.com/absinthe-graphql/absinthe_phoenix/tree/v1.5
+
+### Phoenix 1.5
+
 ```elixir
 def deps do
-  [{:absinthe_phoenix, "~> 1.4.0"}]
+  [{:absinthe_phoenix, "~> 2.0.0"}]
 end
 ```
 
@@ -24,8 +28,7 @@ You need to have a working phoenix pubsub configured. Here is what the default l
 ```elixir
 config :my_app, MyAppWeb.Endpoint,
   # ... other config
-  pubsub: [name: MyApp.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub_server: MyApp.PubSub
 ```
 
 In your application supervisor add a line AFTER your existing endpoint supervision
@@ -34,8 +37,8 @@ line:
 ```elixir
 [
   # other children ...
-  supervisor(MyAppWeb.Endpoint, []), # this line should already exist
-  supervisor(Absinthe.Subscription, [MyAppWeb.Endpoint]), # add this line
+  MyAppWeb.Endpoint, # this line should already exist
+  {Absinthe.Subscription, [MyAppWeb.Endpoint]}, # add this line
   # other children ...
 ]
 ```
@@ -49,20 +52,9 @@ use Absinthe.Phoenix.Endpoint
 
 In your socket add:
 
-#### Phoenix 1.3
 ```elixir
 use Absinthe.Phoenix.Socket,
   schema: MyAppWeb.Schema
-```
-
-#### Phoenix 1.2
-
-```elixir
-  use Absinthe.Phoenix.Socket
-  def connect(_params, socket) do
-    socket = Absinthe.Phoenix.Socket.put_schema(socket, MyAppWeb.Schema)
-    {:ok, socket}
-  end
 ```
 
 Where `MyAppWeb.Schema` is the name of your Absinthe schema module.
