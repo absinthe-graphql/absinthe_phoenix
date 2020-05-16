@@ -38,7 +38,7 @@ line:
 [
   # other children ...
   MyAppWeb.Endpoint, # this line should already exist
-  {Absinthe.Subscription, [MyAppWeb.Endpoint]}, # add this line
+  {Absinthe.Subscription, MyAppWeb.Endpoint}, # add this line
   # other children ...
 ]
 ```
