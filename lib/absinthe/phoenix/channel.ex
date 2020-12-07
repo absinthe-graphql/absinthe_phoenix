@@ -42,7 +42,7 @@ defmodule Absinthe.Phoenix.Channel do
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
 
-    with variables when is_map(variables) <- Map.get(payload, "variables", %{}) do
+    with variables when is_map(variables) <- extract_variables(payload) do
       opts = Keyword.put(config.opts, :variables, variables)
 
       query = Map.get(payload, "query", "")
@@ -126,6 +126,13 @@ defmodule Absinthe.Phoenix.Channel do
 
       {:error, msg, _phases} ->
         {:error, msg}
+    end
+  end
+
+  defp extract_variables(payload) do
+    case Map.get(payload, "variables", %{}) do
+      nil -> %{}
+      map -> map
     end
   end
 
