@@ -221,4 +221,14 @@ defmodule Absinthe.PhoenixTest do
              error: "Could not parse variables as map"
            }
   end
+
+  test "empty variables succeed", %{socket: socket} do
+    ref =
+      push(socket, "doc", %{
+        "query" => "subscription {commentAdded { contents }}",
+        "variables" => nil
+      })
+
+    assert_reply(ref, :ok, %{subscriptionId: _subscription_ref})
+  end
 end
