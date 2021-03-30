@@ -67,7 +67,10 @@ defmodule Absinthe.Phoenix.Socket do
     absinthe_assigns =
       socket.assigns
       |> Map.get(:absinthe, %{})
-      |> Map.put(:opts, opts)
+
+    absinthe_assigns =
+      absinthe_assigns
+      |> Map.put(:opts, Keyword.merge(Map.get(absinthe_assigns, :opts, []), opts))
 
     Phoenix.Socket.assign(socket, :absinthe, absinthe_assigns)
   end
