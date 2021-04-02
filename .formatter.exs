@@ -1,3 +1,4 @@
+# Used by "mix format"
 [
   inputs: [
     "{config,lib,priv,test}/**/*.{ex,exs}",
