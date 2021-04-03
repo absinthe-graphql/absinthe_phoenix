@@ -23,7 +23,9 @@ For Phoenix 1.4, see the v1.5 branch: https://github.com/absinthe-graphql/absint
 
 ```elixir
 def deps do
-  [{:absinthe_phoenix, "~> 2.0.0"}]
+  [
+    {:absinthe_phoenix, "~> 2.0.0"}
+  ]
 end
 ```
 
@@ -49,7 +51,7 @@ See the [GitHub organization](https://github.com/absinthe-graphql).
 
 ## Usage
 
-You need to have a working phoenix pubsub configured. Here is what the default looks like if you create a new phoenix project:
+You need to have a working Phoenix PubSub configured. Here is what the default looks like if you create a new Phoenix project:
 
 ```elixir
 config :my_app, MyAppWeb.Endpoint,
@@ -115,6 +117,8 @@ our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 Please follow [contribution guide](./CONTRIBUTING.md).
 
-## License
+## Copyright and License
 
-See [LICENSE.md](./LICENSE.md).
+Copyright (c) 2016 Bruce Williams, Ben Wilson
+
+Released under the MIT License, which can be found in [LICENSE.md](./LICENSE.md).

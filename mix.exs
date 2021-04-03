@@ -1,6 +1,7 @@
 defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
+  @source_url "https://github.com/absinthe-graphql/absinthe_phoenix"
   @version "2.0.1"
 
   def project do
@@ -9,11 +10,10 @@ defmodule Absinthe.Phoenix.Mixfile do
       version: @version,
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
-      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      docs: [source_ref: "v#{@version}"],
       package: package(),
-      deps: deps()
+      deps: deps(),
+      docs: docs()
     ]
   end
 
@@ -21,14 +21,21 @@ defmodule Absinthe.Phoenix.Mixfile do
     [
       description:
         "Subscription support via Phoenix for Absinthe, the GraphQL implementation for Elixir.",
-      files: ["lib", "mix.exs", "README*"],
+      files: [
+        "lib",
+        "mix.exs",
+        "README.md",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "LICENSE.md"
+      ],
       maintainers: ["Ben Wilson", "Bruce Williams"],
       licenses: ["MIT"],
       links: %{
         Website: "https://absinthe-graphql.org",
-        Changelog:
-          "https://github.com/absinthe-graphql/absinthe_phoenix/blob/master/CHANGELOG.md",
-        GitHub: "https://github.com/absinthe-graphql/absinthe_phoenix"
+        Changelog: "https://hexdocs.pm/absinthe_phoenix/changelog.html",
+        GitHub: @source_url
       }
     ]
   end
@@ -37,7 +44,9 @@ defmodule Absinthe.Phoenix.Mixfile do
   defp elixirc_paths(_), do: ["lib"]
 
   def application do
-    [extra_applications: [:logger]]
+    [
+      extra_applications: [:logger]
+    ]
   end
 
   defp deps do
@@ -48,8 +57,24 @@ defmodule Absinthe.Phoenix.Mixfile do
       {:phoenix, "~> 1.5"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_html, "~> 2.13", optional: true},
-      {:ex_doc, "~> 0.14", only: :dev},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]}
+    ]
+  end
+
+  defp docs do
+    [
+      extras: [
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "LICENSE.md": [title: "License"],
+        "README.md": [title: "Overview"]
+      ],
+      main: "readme",
+      source_url: @source_url,
+      source_ref: "v#{@version}",
+      formatters: ["html"]
     ]
   end
 end

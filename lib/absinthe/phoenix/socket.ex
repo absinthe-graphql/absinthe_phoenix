@@ -3,7 +3,7 @@ defmodule Absinthe.Phoenix.Socket do
   `Absinthe.Phoenix.Socket` is used as a module for setting up a control
   channel for handling GraphQL subscriptions.
 
-  ## Example
+  ## Examples
 
       defmodule MyApp.Web.UserSocket do
         use Phoenix.Socket
@@ -24,7 +24,7 @@ defmodule Absinthe.Phoenix.Socket do
 
   ## Phoenix 1.2
 
-  If you're on Phoenix 1.2 see `put_schema/2`
+  If you're on Phoenix 1.2 see `put_schema/2`.
   """
 
   defmacro __using__(opts) do
@@ -44,23 +44,22 @@ defmodule Absinthe.Phoenix.Socket do
   end
 
   @doc """
-  Configure Absinthe options for a socket
+  Configure Absinthe options for a socket.
 
   ## Examples
 
-  ```
-  def connect(params, socket) do
-    current_user = current_user(params)
-    socket = Absinthe.Phoenix.Socket.put_options(socket, context: %{
-      current_user: current_user
-    })
-    {:ok, socket}
-  end
+      def connect(params, socket) do
+        current_user = current_user(params)
+        socket = Absinthe.Phoenix.Socket.put_options(socket, context: %{
+          current_user: current_user
+        })
+        {:ok, socket}
+      end
 
-  defp current_user(%{"user_id" => id}) do
-    MyApp.Repo.get(User, id)
-  end
-  ```
+      defp current_user(%{"user_id" => id}) do
+        MyApp.Repo.get(User, id)
+      end
+
   """
   @spec put_options(Phoenix.Socket.t(), Absinthe.run_opts()) :: Phoenix.Socket.t()
   def put_options(socket, opts) do
@@ -79,11 +78,10 @@ defmodule Absinthe.Phoenix.Socket do
   end
 
   @doc """
-  Configure the schema for a socket
+  Configure the schema for a socket.
 
-  Only use this if you are not yet on Phoenix 1.3. If you're on Phoenix 1.3, read the moduledocs.
-
-
+  Only use this if you are not yet on Phoenix 1.3. If you're on Phoenix 1.3,
+  read the moduledocs.
   """
   @spec put_schema(Phoenix.Socket.t(), Absinthe.Schema.t()) :: Phoenix.Socket.t()
   def put_schema(socket, schema) do

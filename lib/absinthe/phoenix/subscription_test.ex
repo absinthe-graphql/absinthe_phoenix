@@ -1,6 +1,6 @@
 defmodule Absinthe.Phoenix.SubscriptionTest do
   @moduledoc """
-  Convenience functions for subscription tests
+  Convenience functions for subscription tests.
   """
 
   @typep opts ::

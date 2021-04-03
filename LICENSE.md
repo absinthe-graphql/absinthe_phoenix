@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) Bruce Williams, Ben Wilson
+Copyright (c) 2016 Bruce Williams, Ben Wilson
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
