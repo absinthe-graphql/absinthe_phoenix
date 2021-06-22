@@ -10,18 +10,18 @@ defmodule Absinthe.Phoenix.Presence do
           use Absinthe.Phoenix.Socket,
               presence_config: %{
                   module: MyAppWeb.Presence,
-                  meta_fn: &MyAppWeb.some_meta_logic_fn/1,
-                  key_fn: &MyAppWeb.some_key_logic_fn/1
+                  meta_fn: {MyAppWeb, :some_meta_logic_fn},
+                  key_fn: {MyAppWeb, :some_key_logic_fn}
               }
           
           ...
       end
       '''
-      *   The some_meta_logic/1 function is a function that returns the `meta` argument that Phoenix.Presence.track/3 expects (see https://hexdocs.pm/phoenix/Phoenix.Presence.html#c:track/3 for more info).
-          The argument should be socket itself, which is of type `Phoenix.Socket`. The reason it is a function and not a single data item is that it allows the devloper to be
+      *   The :some_meta_logic atom is a function that returns the `meta` argument that Phoenix.Presence.track/3 expects (see https://hexdocs.pm/phoenix/Phoenix.Presence.html#c:track/3 for more info).
+          The single argument this function should handle is the socket itself, which is of type `Phoenix.Socket`. The reason it is a function and not a single data item is that it allows the devloper to be
           flexible and apply/get whatever meta logic/data they want from the socket
-      *   The some_key_logic_fn/1 function is a function that returns the `key` argument that Phoenix.Presence.track/3 expects (see https://hexdocs.pm/phoenix/Phoenix.Presence.html#c:track/3 for more info).
-          The argument should be socket itself, which is of type `Phoenix.Socket`. The reason it is a function and not a single data item is that it allows the devloper to be
+      *   The :some_key_logic_fn atom is a function that returns the `key` argument that Phoenix.Presence.track/3 expects (see https://hexdocs.pm/phoenix/Phoenix.Presence.html#c:track/3 for more info).
+          The single argument this function should handle is the socket itself, which is of type `Phoenix.Socket`. The reason it is a function and not a single data item is that it allows the devloper to be
           flexible and apply/get whatever key logic/data they want from the socket        
   """
   require Logger
@@ -37,10 +37,13 @@ defmodule Absinthe.Phoenix.Presence do
   def track(socket = %{assigns: %{__absinthe_presence_config__: presence_config}})
       when is_map(presence_config) do
     module = Map.get(presence_config, :module, __MODULE__.Defaults)
-    meta_fn = Map.get(presence_config, :meta_fn, &__MODULE__.Defaults.meta_fn/1)
-    key_fn = Map.get(presence_config, :key_fn, &__MODULE__.Defaults.key_fn/1)
+    meta_fn = Map.get(presence_config, :meta_fn, {__MODULE__.Defaults, :meta_fn})
+    key_fn = Map.get(presence_config, :key_fn, {__MODULE__.Defaults, :key_fn})
 
-    {:ok, _} = module.track(socket, key_fn.(socket), meta_fn.(socket))
+    meta = execute(meta_fn, socket)
+    key = execute(key_fn, socket)
+
+    {:ok, _} = module.track(socket, key, meta)
   end
 
   def track(_socket) do
@@ -75,6 +78,10 @@ defmodule Absinthe.Phoenix.Presence do
     )
 
     nil
+  end
+
+  defp execute({module, function}, args) do
+    apply(module, function, [args])
   end
 
   defmodule Defaults do
