@@ -1,6 +1,7 @@
 defmodule Absinthe.Phoenix.Channel do
   use Phoenix.Channel
   require Logger
+  alias Absinthe.Phoenix.Presence
 
   @moduledoc false
 
@@ -33,6 +34,8 @@ defmodule Absinthe.Phoenix.Channel do
 
     absinthe_config =
       Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
+
+    send(self(), :after_join)
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -140,6 +143,16 @@ defmodule Absinthe.Phoenix.Channel do
   def default_pipeline(schema, options) do
     schema
     |> Absinthe.Pipeline.for_document(options)
+  end
+
+  def handle_info(
+        :after_join,
+        socket = %{assigns: %{__absinthe_presence_config__: presence_config}}
+      )
+      when is_map(presence_config) do
+    Presence.track(socket)
+    push(socket, "presence_state", Presence.list(socket))
+    {:noreply, socket}
   end
 
   def handle_info(_, state) do
