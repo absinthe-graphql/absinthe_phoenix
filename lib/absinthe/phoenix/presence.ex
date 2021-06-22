@@ -10,8 +10,8 @@ defmodule Absinthe.Phoenix.Presence do
           use Absinthe.Phoenix.Socket,
               presence_config: %{
                   module: MyAppWeb.Presence,
-                  meta_fn: &some_meta_logic_fn/1,
-                  key_fn: &some_key_logic_fn/1
+                  meta_fn: &MyAppWeb.some_meta_logic_fn/1,
+                  key_fn: &MyAppWeb.some_key_logic_fn/1
               }
           
           ...
@@ -44,7 +44,7 @@ defmodule Absinthe.Phoenix.Presence do
   end
 
   def track(_socket) do
-    Logger.warn(
+    Logger.debug(
       "Cannot track as socket.assigns does not contain a valid :__abinthe_presence_config__ key!"
     )
 
@@ -59,7 +59,7 @@ defmodule Absinthe.Phoenix.Presence do
     module = Map.get(presence_config, :module)
 
     if module == nil do
-      Logger.warn(
+      Logger.debug(
         "Cannot list as the :__abinthe_presence_config__ map does not contain a :module key!"
       )
 
@@ -70,7 +70,7 @@ defmodule Absinthe.Phoenix.Presence do
   end
 
   def list(_socket) do
-    Logger.warn(
+    Logger.debug(
       "Cannot list as socket.assigns does not contain a valid :__abinthe_presence_config__ key!"
     )
 
