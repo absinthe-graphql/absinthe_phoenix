@@ -17,6 +17,8 @@ defmodule Absinthe.Phoenix.Channel do
   def join("__absinthe__:control", _, socket) do
     schema = socket.assigns[:__absinthe_schema__]
     pipeline = socket.assigns[:__absinthe_pipeline__]
+    endpoint = socket.assigns[:__absinthe_endpoint__] || socket.endpoint
+    socket = Map.put(socket, :endpoint, endpoint)
 
     absinthe_config = Map.get(socket.assigns, :absinthe, %{})
 

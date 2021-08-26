@@ -30,6 +30,8 @@ defmodule Absinthe.Phoenix.Socket do
   defmacro __using__(opts) do
     schema = Keyword.get(opts, :schema)
     pipeline = Keyword.get(opts, :pipeline)
+    # custom endpoint to decouple from Phoenix.Endpoint
+    endpoint = Keyword.get(opts, :endpoint)
 
     quote do
       channel(
@@ -37,7 +39,8 @@ defmodule Absinthe.Phoenix.Socket do
         Absinthe.Phoenix.Channel,
         assigns: %{
           __absinthe_schema__: unquote(schema),
-          __absinthe_pipeline__: unquote(pipeline)
+          __absinthe_pipeline__: unquote(pipeline),
+          __absinthe_endpoint__: unquote(endpoint)
         }
       )
     end
