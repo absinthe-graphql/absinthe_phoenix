@@ -2,7 +2,7 @@ defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/absinthe-graphql/absinthe_phoenix"
-  @version "2.0.1"
+  @version "2.0.2"
 
   def project do
     [
