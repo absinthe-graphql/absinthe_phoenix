@@ -168,7 +168,7 @@ defmodule Absinthe.Phoenix.Channel do
     |> Keyword.get(:context, %{handler: nil})
     |> Map.get(:handler)
     
-    send(handler, :send_updates)
+    if is_pid(handler), do: send(handler, :send_updates)
     {:noreply, socket}
   end
 
