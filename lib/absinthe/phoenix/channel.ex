@@ -59,6 +59,10 @@ defmodule Absinthe.Phoenix.Channel do
 
       {reply, socket} = run_doc(socket, query, config, opts)
 
+      ## Message ourselves to tell the server the client is ready to receive data now
+      ## Note, the below message will not be executed until this current message is finished
+      ## since they are part of the same GenServer.
+      send(self(), :ready_for_data)
       Logger.debug(fn ->
         """
         -- Absinthe Phoenix Reply --
@@ -152,6 +156,19 @@ defmodule Absinthe.Phoenix.Channel do
       when is_map(presence_config) do
     Presence.track(socket)
     push(socket, "presence_state", Presence.list(socket))
+    {:noreply, socket}
+  end
+
+  ## This handler is used to tell our handler it can send its data
+  def handle_info(:ready_for_data, socket) do
+    handler =
+    socket.assigns
+    |> Map.get(:absinthe, %{})
+    |> Map.get(:opts, [])
+    |> Keyword.get(:context, %{handler: nil})
+    |> Map.get(:handler)
+    
+    send(handler, :send_updates)
     {:noreply, socket}
   end
 
