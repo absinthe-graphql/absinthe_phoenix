@@ -208,7 +208,7 @@ defmodule Absinthe.PhoenixTest do
            }
   end
 
-  test "inavlid variables returns error", %{socket: socket} do
+  test "invalid variables returns error", %{socket: socket} do
     ref =
       push(socket, "doc", %{
         "query" => "mutation ($val: Int) {mutate (val: $val)}",

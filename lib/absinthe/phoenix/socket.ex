@@ -28,6 +28,13 @@ defmodule Absinthe.Phoenix.Socket do
   """
 
   defmacro __using__(opts) do
+    opts =
+      if Macro.quoted_literal?(opts) do
+        Macro.prewalk(opts, &expand_alias(&1, __CALLER__))
+      else
+        opts
+      end
+
     schema = Keyword.get(opts, :schema)
     pipeline = Keyword.get(opts, :pipeline)
     presence_config = Keyword.get(opts, :presence_config)
@@ -94,4 +101,9 @@ defmodule Absinthe.Phoenix.Socket do
 
     Phoenix.Socket.assign(socket, :absinthe, absinthe_assigns)
   end
+
+  defp expand_alias({:__aliases__, _, _} = alias, env),
+    do: Macro.expand(alias, %{env | function: {:__using__, 1}})
+
+  defp expand_alias(other, _env), do: other
 end
