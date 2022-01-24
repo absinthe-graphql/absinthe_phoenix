@@ -1,6 +1,7 @@
 defmodule Absinthe.Phoenix.Channel do
   use Phoenix.Channel
   require Logger
+  alias Absinthe.Phoenix.Presence
 
   @moduledoc false
 
@@ -34,6 +35,8 @@ defmodule Absinthe.Phoenix.Channel do
     absinthe_config =
       Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
 
+    send(self(), :after_join)
+
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
   end
@@ -56,6 +59,17 @@ defmodule Absinthe.Phoenix.Channel do
 
       {reply, socket} = run_doc(socket, query, config, opts)
 
+      ## Message ourselves to tell the server the client is ready to receive data now
+      ## Note, the below message will not be executed until this current message is finished
+      ## since they are part of the same GenServer.
+      handler =
+        socket.assigns
+        |> Map.get(:absinthe, %{})
+        |> Map.get(:opts, [])
+        |> Keyword.get(:context, %{handler: nil})
+        |> Map.get(:handler)
+
+      send(self(), {:ready_for_data, handler})
       Logger.debug(fn ->
         """
         -- Absinthe Phoenix Reply --
@@ -140,6 +154,22 @@ defmodule Absinthe.Phoenix.Channel do
   def default_pipeline(schema, options) do
     schema
     |> Absinthe.Pipeline.for_document(options)
+  end
+
+  def handle_info(
+        :after_join,
+        socket = %{assigns: %{__absinthe_presence_config__: presence_config}}
+      )
+      when is_map(presence_config) do
+    Presence.track(socket)
+    push(socket, "presence_state", Presence.list(socket))
+    {:noreply, socket}
+  end
+
+  ## This handler is used to tell our handler it can send its data
+  def handle_info({:ready_for_data, handler}, socket) when is_pid(handler) do
+    send(handler, :send_updates)
+    {:noreply, socket}
   end
 
   def handle_info(_, state) do
