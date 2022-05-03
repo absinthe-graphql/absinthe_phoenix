@@ -37,6 +37,7 @@ defmodule Absinthe.Phoenix.Channel do
     socket =
       socket
       |> assign(:absinthe, absinthe_config)
+
     {:ok, socket}
   end
 
@@ -90,9 +91,10 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   def handle_info(
-    %Phoenix.Socket.Broadcast{payload: %{result: %{ordinal: ordinal}}} = msg,
-    socket
-  ) when not is_nil(ordinal) do
+        %Phoenix.Socket.Broadcast{payload: %{result: %{ordinal: ordinal}}} = msg,
+        socket
+      )
+      when not is_nil(ordinal) do
     absinthe_assigns = Map.get(socket.assigns, :absinthe, %{})
     last_ordinal = absinthe_assigns[:subscription_ordinals][msg.topic]
 
@@ -101,6 +103,7 @@ defmodule Absinthe.Phoenix.Channel do
         send_msg(msg, socket)
         socket = update_ordinal(socket, msg.topic, ordinal)
         {:noreply, socket}
+
       true ->
         {:noreply, socket}
     end
@@ -118,12 +121,17 @@ defmodule Absinthe.Phoenix.Channel do
 
   defp update_ordinal(socket, topic, ordinal) do
     absinthe_assigns = Map.get(socket, :absinthe, %{})
+
     ordinals =
       absinthe_assigns
       |> Map.get(:subscription_ordinals, %{})
       |> Map.put(topic, ordinal)
 
-    Phoenix.Socket.assign(socket, :absinthe, Map.put(absinthe_assigns, :subscription_ordinals, ordinals))
+    Phoenix.Socket.assign(
+      socket,
+      :absinthe,
+      Map.put(absinthe_assigns, :subscription_ordinals, ordinals)
+    )
   end
 
   defp run_doc(socket, query, config, opts) do
@@ -154,6 +162,7 @@ defmodule Absinthe.Phoenix.Channel do
 
       {:more, %{data: _} = reply, continuation, context} ->
         id = new_query_id()
+
         socket =
           socket
           |> Absinthe.Phoenix.Socket.put_options(context: context)
@@ -172,17 +181,19 @@ defmodule Absinthe.Phoenix.Channel do
     case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
       {:ok, %{result: %{continuation: continuation} = result, execution: res}, _phases} ->
         {:more, Map.delete(result, :continuation), continuation, res.context}
+
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
+
       {:error, msg, _phases} ->
         {:error, msg}
     end
   end
 
   defp pubsub_subscribe(
-    topic,
-    %{transport_pid: transport_pid, serializer: serializer, pubsub_server: pubsub_server}
-  ) do
+         topic,
+         %{transport_pid: transport_pid, serializer: serializer, pubsub_server: pubsub_server}
+       ) do
     :ok =
       Phoenix.PubSub.subscribe(
         pubsub_server,
@@ -191,7 +202,6 @@ defmodule Absinthe.Phoenix.Channel do
         link: true
       )
   end
-
 
   defp extract_variables(payload) do
     case Map.get(payload, "variables", %{}) do
@@ -214,14 +224,17 @@ defmodule Absinthe.Phoenix.Channel do
           |> Map.delete(:continuation)
           |> add_query_id(id)
 
-        push socket, "doc", result
+        push(socket, "doc", result)
         handle_continuation(socket, next_continuation, id)
+
       {:ok, %{result: result}, _phases} ->
-        push socket, "doc", add_query_id(result, id)
+        push(socket, "doc", add_query_id(result, id))
+
       {:ok, %{errors: errors}, _phases} ->
-        push socket, "doc", add_query_id(%{errors: errors}, id)
+        push(socket, "doc", add_query_id(%{errors: errors}, id))
+
       {:error, msg, _phases} ->
-        push socket, "doc", add_query_id(msg, id)
+        push(socket, "doc", add_query_id(msg, id))
     end
   end
 
@@ -241,12 +254,13 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   defp push_subscription_item(data, topic, socket) do
-    msg = %Phoenix.Socket.Broadcast{
-      topic: topic,
-      event: "subscription:data",
-      payload: %{result: %{data: data}, subscriptionId: topic}
-    }
-    |> socket.serializer.fastlane!()
+    msg =
+      %Phoenix.Socket.Broadcast{
+        topic: topic,
+        event: "subscription:data",
+        payload: %{result: %{data: data}, subscriptionId: topic}
+      }
+      |> socket.serializer.fastlane!()
 
     send(socket.transport_pid, msg)
   end

@@ -100,9 +100,11 @@ defmodule Schema do
 
     field :prime, :string do
       config fn _, _ ->
-        {:ok, topic: "prime_topic", prime: fn _ ->
-          {:ok, ["prime1", "prime2"]}
-        end}
+        {:ok,
+         topic: "prime_topic",
+         prime: fn _ ->
+           {:ok, ["prime1", "prime2"]}
+         end}
       end
     end
 
