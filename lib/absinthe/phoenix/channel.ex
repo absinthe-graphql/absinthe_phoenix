@@ -37,7 +37,6 @@ defmodule Absinthe.Phoenix.Channel do
     socket =
       socket
       |> assign(:absinthe, absinthe_config)
-      |> assign(:async_procs, [])
     {:ok, socket}
   end
 
@@ -90,31 +89,56 @@ defmodule Absinthe.Phoenix.Channel do
     {:reply, {:ok, %{subscriptionId: doc_id}}, socket}
   end
 
+  def handle_info(
+    %Phoenix.Socket.Broadcast{payload: %{result: %{ordinal: ordinal}}} = msg,
+    socket
+  ) when not is_nil(ordinal) do
+    absinthe_assigns = Map.get(socket.assigns, :absinthe, %{})
+    last_ordinal = absinthe_assigns[:subscription_ordinals][msg.topic]
+
+    cond do
+      last_ordinal == nil or last_ordinal < ordinal ->
+        send_msg(msg, socket)
+        socket = update_ordinal(socket, msg.topic, ordinal)
+        {:noreply, socket}
+      true ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_info(msg, socket) do
+    send_msg(msg, socket)
+    {:noreply, socket}
+  end
+
+  defp send_msg(msg, socket) do
+    encoded_msg = socket.serializer.fastlane!(msg)
+    send(socket.transport_pid, encoded_msg)
+  end
+
+  defp update_ordinal(socket, topic, ordinal) do
+    absinthe_assigns = Map.get(socket, :absinthe, %{})
+    ordinals =
+      absinthe_assigns
+      |> Map.get(:subscription_ordinals, %{})
+      |> Map.put(topic, ordinal)
+
+    Phoenix.Socket.assign(socket, :absinthe, Map.put(absinthe_assigns, :subscription_ordinals, ordinals))
+  end
+
   defp run_doc(socket, query, config, opts) do
     case run(query, config[:schema], config[:pipeline], opts) do
       {:ok, %{"subscribed" => topic}, context} ->
-        %{transport_pid: transport_pid, serializer: serializer, pubsub_server: pubsub_server} =
-          socket
-
-        :ok =
-          Phoenix.PubSub.subscribe(
-            pubsub_server,
-            topic,
-            metadata: {:fastlane, transport_pid, serializer, []},
-            link: true
-          )
-
+        pubsub_subscribe(topic, socket)
         socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
+
         {{:ok, %{subscriptionId: topic}}, socket}
 
       {:more, %{"subscribed" => topic}, continuation, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
         reply(socket_ref(socket), {:ok, %{subscriptionId: topic}})
 
-        :ok = Phoenix.PubSub.subscribe(socket.pubsub_server, topic, [
-          fastlane: {socket.transport_pid, socket.serializer, []},
-          link: true,
-        ])
+        pubsub_subscribe(topic, socket)
+        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
 
         handle_subscription_continuation(continuation, topic, socket)
 
@@ -129,10 +153,11 @@ defmodule Absinthe.Phoenix.Channel do
         {{:error, reply}, socket}
 
       {:more, %{data: _} = reply, continuation, context} ->
-        socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
-
         id = new_query_id()
-        socket = handle_continuation(continuation, id, socket)
+        socket =
+          socket
+          |> Absinthe.Phoenix.Socket.put_options(context: context)
+          |> handle_continuation(continuation, id)
 
         {{:ok, add_query_id(reply, id)}, socket}
 
@@ -154,6 +179,20 @@ defmodule Absinthe.Phoenix.Channel do
     end
   end
 
+  defp pubsub_subscribe(
+    topic,
+    %{transport_pid: transport_pid, serializer: serializer, pubsub_server: pubsub_server}
+  ) do
+    :ok =
+      Phoenix.PubSub.subscribe(
+        pubsub_server,
+        topic,
+        metadata: {:fastlane, transport_pid, serializer, ["subscription:data"]},
+        link: true
+      )
+  end
+
+
   defp extract_variables(payload) do
     case Map.get(payload, "variables", %{}) do
       nil -> %{}
@@ -167,40 +206,16 @@ defmodule Absinthe.Phoenix.Channel do
     |> Absinthe.Pipeline.for_document(options)
   end
 
-  def handle_info({:DOWN, ref, :process, _pid, _reason}, socket) do
-    procs = List.delete(socket.assigns.async_procs, ref)
-    {:noreply, assign(socket, :async_procs, procs)}
-  end
-
-  def handle_info(_, state) do
-    {:noreply, state}
-  end
-
-  defp handle_continuation(continuation, id, socket) do
-    max_procs = socket.assigns[:max_async_procs] || 0
-
-    case socket.assigns.async_procs do
-      procs when length(procs) < max_procs ->
-        {_pid, ref} = Process.spawn(
-          fn -> do_handle_continuation(continuation, id, socket) end,
-          [:link, :monitor])
-        assign(socket, :async_procs, [ref | procs])
-      _ ->
-        do_handle_continuation(continuation, id, socket)
-        socket
-    end
-  end
-
-  defp do_handle_continuation(continuation, id, socket) do
+  defp handle_continuation(socket, continuation, id) do
     case Absinthe.Pipeline.continue(continuation) do
-      {:ok, %{result: %{continuation: continuation} = result}, _phases} ->
+      {:ok, %{result: %{continuation: next_continuation} = result}, _phases} ->
         result =
           result
           |> Map.delete(:continuation)
           |> add_query_id(id)
 
         push socket, "doc", result
-        do_handle_continuation(continuation, id, socket)
+        handle_continuation(socket, next_continuation, id)
       {:ok, %{result: result}, _phases} ->
         push socket, "doc", add_query_id(result, id)
       {:ok, %{errors: errors}, _phases} ->

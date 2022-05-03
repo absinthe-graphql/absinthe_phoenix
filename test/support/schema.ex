@@ -99,10 +99,16 @@ defmodule Schema do
     end
 
     field :prime, :string do
-      config fn _, %{context: %{pubsub: pubsub}} ->
-        {:ok, topic: "prime_topic", prime: fn ->
+      config fn _, _ ->
+        {:ok, topic: "prime_topic", prime: fn _ ->
           {:ok, ["prime1", "prime2"]}
         end}
+      end
+    end
+
+    field :ordinal, :integer do
+      config fn _, _ ->
+        {:ok, topic: "ordinal_topic", ordinal: fn value -> value end}
       end
     end
   end

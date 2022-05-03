@@ -100,7 +100,7 @@ defmodule Absinthe.PhoenixTest do
     assert_push("subscription:data", push)
 
     expected = %{
-      result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}},
+      result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}, ordinal: nil},
       subscriptionId: subscription_ref
     }
 
@@ -142,6 +142,27 @@ defmodule Absinthe.PhoenixTest do
 
     assert_push "subscription:data", push
     expected = %{result: %{data: %{"prime" => "prime2"}}, subscriptionId: subscription_ref}
+    assert expected == push
+  end
+
+  test "subscription with ordinal", %{socket: socket} do
+    ref = push socket, "doc", %{"query" => "subscription { ordinal }"}
+
+    assert_reply ref, :ok, %{subscriptionId: subscription_ref}
+
+    Absinthe.Subscription.publish(TestEndpoint, 1, ordinal: "ordinal_topic")
+
+    assert_push "subscription:data", push
+    expected = %{result: %{data: %{"ordinal" => 1}, ordinal: 1}, subscriptionId: subscription_ref}
+    assert expected == push
+
+    Absinthe.Subscription.publish(TestEndpoint, 0, ordinal: "ordinal_topic")
+    # This message should not generate a notification because it has a lower ordinal
+
+    Absinthe.Subscription.publish(TestEndpoint, 2, ordinal: "ordinal_topic")
+
+    assert_push "subscription:data", push
+    expected = %{result: %{data: %{"ordinal" => 2}, ordinal: 2}, subscriptionId: subscription_ref}
     assert expected == push
   end
 
