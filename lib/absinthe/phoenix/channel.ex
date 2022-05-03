@@ -34,9 +34,7 @@ defmodule Absinthe.Phoenix.Channel do
     absinthe_config =
       Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
 
-    socket =
-      socket
-      |> assign(:absinthe, absinthe_config)
+    socket = socket |> assign(:absinthe, absinthe_config)
 
     {:ok, socket}
   end

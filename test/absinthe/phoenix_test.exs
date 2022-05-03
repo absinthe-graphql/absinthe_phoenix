@@ -152,16 +152,16 @@ defmodule Absinthe.PhoenixTest do
 
     assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
 
-    Absinthe.Subscription.publish(TestEndpoint, 1, ordinal: "ordinal_topic")
+    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 1, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
     expected = %{result: %{data: %{"ordinal" => 1}, ordinal: 1}, subscriptionId: subscription_ref}
     assert expected == push
 
-    Absinthe.Subscription.publish(TestEndpoint, 0, ordinal: "ordinal_topic")
+    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 0, ordinal: "ordinal_topic")
     # This message should not generate a notification because it has a lower ordinal
 
-    Absinthe.Subscription.publish(TestEndpoint, 2, ordinal: "ordinal_topic")
+    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 2, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
     expected = %{result: %{data: %{"ordinal" => 2}, ordinal: 2}, subscriptionId: subscription_ref}
