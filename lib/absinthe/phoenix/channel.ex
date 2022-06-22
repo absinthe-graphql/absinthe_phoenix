@@ -233,6 +233,9 @@ defmodule Absinthe.Phoenix.Channel do
 
       {:error, msg, _phases} ->
         push(socket, "doc", add_query_id(msg, id))
+
+      :no_more_results ->
+        socket
     end
   end
 
@@ -242,12 +245,17 @@ defmodule Absinthe.Phoenix.Channel do
   defp add_query_id(result, id), do: Map.put(result, :queryId, id)
 
   defp handle_subscription_continuation(continuation, topic, socket) do
-    {:ok, %{result: result}, _phases} = Absinthe.Pipeline.continue(continuation)
-    push_subscription_item(result.data, topic, socket)
+    case Absinthe.Pipeline.continue(continuation) do
+      :no_more_results ->
+        :ok
 
-    case result[:continuation] do
-      nil -> :ok
-      c -> handle_subscription_continuation(c, topic, socket)
+      {:ok, %{result: result}, _phases} ->
+        push_subscription_item(result.data, topic, socket)
+
+        case result[:continuation] do
+          nil -> :ok
+          c -> handle_subscription_continuation(c, topic, socket)
+        end
     end
   end
 
