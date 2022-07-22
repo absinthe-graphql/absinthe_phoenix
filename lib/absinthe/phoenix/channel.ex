@@ -118,7 +118,7 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   defp update_ordinal(socket, topic, ordinal) do
-    absinthe_assigns = Map.get(socket, :absinthe, %{})
+    absinthe_assigns = Map.get(socket.assigns, :absinthe, %{})
 
     ordinals =
       absinthe_assigns
