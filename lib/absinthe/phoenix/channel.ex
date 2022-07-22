@@ -250,7 +250,7 @@ defmodule Absinthe.Phoenix.Channel do
         :ok
 
       {:ok, %{result: result}, _phases} ->
-        push_subscription_item(result.data, topic, socket)
+        socket = push_subscription_item(result.data, result.ordinal, topic, socket)
 
         case result[:continuation] do
           nil -> :ok
@@ -259,15 +259,15 @@ defmodule Absinthe.Phoenix.Channel do
     end
   end
 
-  defp push_subscription_item(data, topic, socket) do
+  defp push_subscription_item(data, ordinal, topic, socket) do
     msg =
       %Phoenix.Socket.Broadcast{
         topic: topic,
         event: "subscription:data",
-        payload: %{result: %{data: data}, subscriptionId: topic}
+        payload: %{result: %{data: data, ordinal: ordinal}, subscriptionId: topic}
       }
-      |> socket.serializer.fastlane!()
+    {:noreply, socket} = handle_info(msg, socket)
 
-    send(socket.transport_pid, msg)
+    socket
   end
 end
