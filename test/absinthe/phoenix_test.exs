@@ -139,11 +139,21 @@ defmodule Absinthe.PhoenixTest do
     assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
 
     assert_push("subscription:data", push)
-    expected = %{result: %{data: %{"prime" => "prime1"}}, subscriptionId: subscription_ref}
+
+    expected = %{
+      result: %{data: %{"prime" => "prime1"}, ordinal: nil},
+      subscriptionId: subscription_ref
+    }
+
     assert expected == push
 
     assert_push("subscription:data", push)
-    expected = %{result: %{data: %{"prime" => "prime2"}}, subscriptionId: subscription_ref}
+
+    expected = %{
+      result: %{data: %{"prime" => "prime2"}, ordinal: nil},
+      subscriptionId: subscription_ref
+    }
+
     assert expected == push
   end
 
