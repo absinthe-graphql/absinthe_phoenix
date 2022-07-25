@@ -260,12 +260,12 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   defp push_subscription_item(data, ordinal, topic, socket) do
-    msg =
-      %Phoenix.Socket.Broadcast{
-        topic: topic,
-        event: "subscription:data",
-        payload: %{result: %{data: data, ordinal: ordinal}, subscriptionId: topic}
-      }
+    msg = %Phoenix.Socket.Broadcast{
+      topic: topic,
+      event: "subscription:data",
+      payload: %{result: %{data: data, ordinal: ordinal}, subscriptionId: topic}
+    }
+
     {:noreply, socket} = handle_info(msg, socket)
 
     socket
