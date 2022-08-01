@@ -100,7 +100,7 @@ defmodule Absinthe.PhoenixTest do
     assert_push("subscription:data", push)
 
     expected = %{
-      result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}, ordinal: nil},
+      result: %{data: %{"commentAdded" => %{"contents" => "hello world"}}},
       subscriptionId: subscription_ref
     }
 
@@ -141,7 +141,7 @@ defmodule Absinthe.PhoenixTest do
     assert_push("subscription:data", push)
 
     expected = %{
-      result: %{data: %{"prime" => "prime1"}, ordinal: nil},
+      result: %{data: %{"prime" => "prime1"}},
       subscriptionId: subscription_ref
     }
 
@@ -150,7 +150,7 @@ defmodule Absinthe.PhoenixTest do
     assert_push("subscription:data", push)
 
     expected = %{
-      result: %{data: %{"prime" => "prime2"}, ordinal: nil},
+      result: %{data: %{"prime" => "prime2"}},
       subscriptionId: subscription_ref
     }
 
@@ -165,7 +165,7 @@ defmodule Absinthe.PhoenixTest do
     Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 1, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
-    expected = %{result: %{data: %{"ordinal" => 1}, ordinal: 1}, subscriptionId: subscription_ref}
+    expected = %{result: %{data: %{"ordinal" => 1}}, subscriptionId: subscription_ref}
     assert expected == push
 
     Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 0, ordinal: "ordinal_topic")
@@ -174,7 +174,7 @@ defmodule Absinthe.PhoenixTest do
     Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 2, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
-    expected = %{result: %{data: %{"ordinal" => 2}, ordinal: 2}, subscriptionId: subscription_ref}
+    expected = %{result: %{data: %{"ordinal" => 2}}, subscriptionId: subscription_ref}
     assert expected == push
   end
 
