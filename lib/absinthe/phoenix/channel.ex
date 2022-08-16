@@ -141,13 +141,13 @@ defmodule Absinthe.Phoenix.Channel do
 
         {{:ok, %{subscriptionId: topic}}, socket}
 
-      {:more, %{"subscribed" => topic}, continuation, context} ->
+      {:more, %{"subscribed" => topic}, continuations, context} ->
         reply(socket_ref(socket), {:ok, %{subscriptionId: topic}})
 
         pubsub_subscribe(topic, socket)
         socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
 
-        handle_subscription_continuation(continuation, topic, socket)
+        handle_subscription_continuation(continuations, topic, socket)
 
         {:noreply, socket}
 
@@ -159,13 +159,13 @@ defmodule Absinthe.Phoenix.Channel do
         socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
         {{:error, reply}, socket}
 
-      {:more, %{data: _} = reply, continuation, context} ->
+      {:more, %{data: _} = reply, continuations, context} ->
         id = new_query_id()
 
         socket =
           socket
           |> Absinthe.Phoenix.Socket.put_options(context: context)
-          |> handle_continuation(continuation, id)
+          |> handle_continuation(continuations, id)
 
         {{:ok, add_query_id(reply, id)}, socket}
 
@@ -178,8 +178,8 @@ defmodule Absinthe.Phoenix.Channel do
     {module, fun} = pipeline
 
     case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
-      {:ok, %{result: %{continuation: continuation} = result, execution: res}, _phases} ->
-        {:more, Map.delete(result, :continuation), continuation, res.context}
+      {:ok, %{result: %{continuations: continuations} = result, execution: res}, _phases} ->
+        {:more, Map.delete(result, :continuations), continuations, res.context}
 
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
@@ -215,16 +215,16 @@ defmodule Absinthe.Phoenix.Channel do
     |> Absinthe.Pipeline.for_document(options)
   end
 
-  defp handle_continuation(socket, continuation, id) do
-    case Absinthe.Pipeline.continue(continuation) do
-      {:ok, %{result: %{continuation: next_continuation} = result}, _phases} ->
+  defp handle_continuation(socket, continuations, id) do
+    case Absinthe.Pipeline.continue(continuations) do
+      {:ok, %{result: %{continuation: next_continuations} = result}, _phases} ->
         result =
           result
-          |> Map.delete(:continuation)
+          |> Map.delete(:continuations)
           |> add_query_id(id)
 
         push(socket, "doc", result)
-        handle_continuation(socket, next_continuation, id)
+        handle_continuation(socket, next_continuations, id)
 
       {:ok, %{result: result}, _phases} ->
         push(socket, "doc", add_query_id(result, id))
@@ -245,15 +245,15 @@ defmodule Absinthe.Phoenix.Channel do
 
   defp add_query_id(result, id), do: Map.put(result, :queryId, id)
 
-  defp handle_subscription_continuation(continuation, topic, socket) do
-    case Absinthe.Pipeline.continue(continuation) do
+  defp handle_subscription_continuation(continuations, topic, socket) do
+    case Absinthe.Pipeline.continue(continuations) do
       {:ok, %{result: :no_more_results}, _phases} ->
         :ok
 
       {:ok, %{result: result}, _phases} ->
         socket = push_subscription_item(result.data, topic, socket)
 
-        case result[:continuation] do
+        case result[:continuations] do
           nil -> :ok
           c -> handle_subscription_continuation(c, topic, socket)
         end
