@@ -7,7 +7,22 @@ defmodule Absinthe.Phoenix.SubscriptionTest do
            [variables: Access.container()]
            | %{variables: Access.container()}
 
+  @doc false
   defmacro __using__(schema: schema) do
+    IO.warn """
+    Using Absinthe.Phoenix.SubscriptionTest is deprecated, instead of:
+
+        use Absinthe.Phoenix.SubscriptionTest, schema: MyApp.Schema
+
+    do:
+
+        import Absinthe.Phoenix.SubscriptionTest
+
+        setup_all do
+          Absinthe.Test.prime(MyApp.Schema)
+        end
+    """, Macro.Env.stacktrace(__CALLER__)
+
     quote do
       setup_all do
         Absinthe.Test.prime(unquote(schema))
