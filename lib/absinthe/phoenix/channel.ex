@@ -1,5 +1,5 @@
 defmodule Absinthe.Phoenix.Channel do
-  use Phoenix.Channel
+  use Phoenix.Channel, log_join: :debug, log_handle_in: :debug
   require Logger
 
   @moduledoc false
