@@ -17,6 +17,7 @@ defmodule Absinthe.Phoenix.Channel do
   def join("__absinthe__:control", _, socket) do
     schema = socket.assigns[:__absinthe_schema__]
     pipeline = socket.assigns[:__absinthe_pipeline__]
+    gc_interval = socket.assigns[:__absinthe_gc_interval__]
 
     absinthe_config = Map.get(socket.assigns, :absinthe, %{})
 
@@ -32,7 +33,13 @@ defmodule Absinthe.Phoenix.Channel do
       |> Map.update(:schema, schema, & &1)
 
     absinthe_config =
-      Map.put(absinthe_config, :pipeline, pipeline || {__MODULE__, :default_pipeline})
+      absinthe_config
+      |> Map.put(:pipeline, pipeline || {__MODULE__, :default_pipeline})
+      |> Map.put(:gc_interval, gc_interval)
+
+    unless gc_interval == nil do
+      Process.send_after(self(), :gc, gc_interval)
+    end
 
     socket = socket |> assign(:absinthe, absinthe_config)
     {:ok, socket}
@@ -142,7 +149,13 @@ defmodule Absinthe.Phoenix.Channel do
     |> Absinthe.Pipeline.for_document(options)
   end
 
-  def handle_info(_, state) do
-    {:noreply, state}
+  def handle_info(:gc, socket) do
+    :erlang.garbage_collect()
+    Process.send_after(self(), :gc, socket.assigns.absinthe.gc_interval)
+    {:noreply, socket}
+  end
+
+  def handle_info(_, socket) do
+    {:noreply, socket}
   end
 end

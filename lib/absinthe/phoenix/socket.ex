@@ -25,6 +25,18 @@ defmodule Absinthe.Phoenix.Socket do
   ## Phoenix 1.2
 
   If you're on Phoenix 1.2 see `put_schema/2`.
+
+  ## Garbage Collection
+
+  In some workloads, the Channel Process responsible for handling [subscriptions may accumulate
+  some gargage](https://elixirforum.com/t/why-does-garbage-collection-not-work-as-intended/50613/2), that is not being collected by the Erlang VM. A workaround for this is to instruct
+  the process to periodically tell the VM to collect its garbage. This can be done by setting the
+  `gc_interval`.
+
+        use Absinthe.Phoenix.Socket,
+          schema: MyApp.Web.Schema,
+          gc_interval: 10_000
+
   """
 
   defmacro __using__(opts) do
@@ -37,6 +49,7 @@ defmodule Absinthe.Phoenix.Socket do
 
     schema = Keyword.get(opts, :schema)
     pipeline = Keyword.get(opts, :pipeline)
+    gc_interval = Keyword.get(opts, :gc_interval)
 
     quote do
       channel(
@@ -44,7 +57,8 @@ defmodule Absinthe.Phoenix.Socket do
         Absinthe.Phoenix.Channel,
         assigns: %{
           __absinthe_schema__: unquote(schema),
-          __absinthe_pipeline__: unquote(pipeline)
+          __absinthe_pipeline__: unquote(pipeline),
+          __absinthe_gc_interval: unquote(gc_interval)
         }
       )
     end
