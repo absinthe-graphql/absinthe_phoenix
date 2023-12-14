@@ -58,7 +58,7 @@ defmodule Absinthe.Phoenix.Socket do
         assigns: %{
           __absinthe_schema__: unquote(schema),
           __absinthe_pipeline__: unquote(pipeline),
-          __absinthe_gc_interval: unquote(gc_interval)
+          __absinthe_gc_interval__: unquote(gc_interval)
         }
       )
     end
