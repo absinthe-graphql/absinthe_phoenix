@@ -151,6 +151,7 @@ defmodule Absinthe.Phoenix.Channel do
 
   def handle_info(:gc, socket) do
     :erlang.garbage_collect()
+    :erlang.garbage_collect(socket.transport_pid)
     Process.send_after(self(), :gc, socket.assigns.absinthe.gc_interval)
     {:noreply, socket}
   end
