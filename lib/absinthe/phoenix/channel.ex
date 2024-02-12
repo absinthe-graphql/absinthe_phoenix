@@ -48,11 +48,11 @@ defmodule Absinthe.Phoenix.Channel do
   @doc false
   def handle_in("doc", payload, socket) do
     config = socket.assigns[:absinthe]
+    {expected_payload, extra_payload} = Map.split(payload, ["query", "variables"])
 
-    with variables when is_map(variables) <- extract_variables(payload) do
-      opts = Keyword.put(config.opts, :variables, variables)
-
-      query = Map.get(payload, "query", "")
+    with variables when is_map(variables) <- extract_variables(expected_payload) do
+      opts = Keyword.merge(config.opts, variables: variables, extra_params: extra_payload)
+      query = Map.get(expected_payload, "query", "")
 
       Absinthe.Logger.log_run(:debug, {
         query,
