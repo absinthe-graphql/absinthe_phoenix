@@ -124,10 +124,18 @@ defmodule Absinthe.Phoenix.Channel do
     end
   end
 
-  defp run(document, schema, pipeline, options) do
-    {module, fun} = pipeline
+  defp run(document, schema, pipeline_mf, options) do
+    {module, fun} = pipeline_mf
+    args = [schema, options]
 
-    case Absinthe.Pipeline.run(document, apply(module, fun, [schema, options])) do
+    blueprint = %Absinthe.Blueprint{input: document, initial_phases: {module, fun, args}}
+
+    pipeline =
+      module
+      |> apply(fun, args)
+      |> Absinthe.Pipeline.without(Absinthe.Phase.Init)
+
+    case Absinthe.Pipeline.run(blueprint, pipeline) do
       {:ok, %{result: result, execution: res}, _phases} ->
         {:ok, result, res.context}
 
