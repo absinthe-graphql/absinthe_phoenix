@@ -29,7 +29,7 @@ def deps do
 end
 ```
 
-Note: Absinthe.Phoenix requires Elixir 1.10 or higher.
+Note: Absinthe.Phoenix requires Elixir 1.11 or higher.
 
 ## Upgrading
 
