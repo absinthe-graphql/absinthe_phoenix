@@ -52,7 +52,7 @@ defmodule Absinthe.Phoenix.Mixfile do
   defp deps do
     [
       {:absinthe_plug, "~> 1.5"},
-      {:absinthe, "~> 1.5"},
+      {:absinthe, "~> 1.5", github: "absinthe-graphql/absinthe", branch: "initial-phases-mfa", override: true},
       {:decimal, "~> 1.0 or ~> 2.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_pubsub, "~> 2.0"},
