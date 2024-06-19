@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.0.3 - 2024-04-02
+
+- Add official support for Elixir 1.15 and OTP 26
+- Drop support for Elixir 1.10
+- Add support for `phoenix_html` 4.0
+- Add `:gc_interval` option to periodically run `:erlang.garbage_collect`, which can help with memory bloat (see [PR](https://github.com/absinthe-graphql/absinthe_phoenix/pull/100))
+
+## v2.0.2 - 2021-09-01
+
+- Add support for `phoenix_html` 3.0
+
+## v2.0.1 - 2021-02-09
+
+- Add support for `decimal` 2.0
+- Relax version requirement for Absinthe
+
 ## v2.0.0 - 2020-05-14
 
 - Phoenix.PubSub 2.0 support
