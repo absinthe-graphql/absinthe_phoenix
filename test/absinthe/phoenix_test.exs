@@ -4,13 +4,16 @@ defmodule Absinthe.PhoenixTest do
 
   import ExUnit.CaptureLog
 
+  alias Absinthe.Subscription
+  alias Absinthe.Phoenix.TestEndpoint
+
   setup_all do
     Absinthe.Test.prime(Schema)
 
     children = [
       {Phoenix.PubSub, [name: Absinthe.Phoenix.PubSub, adapter: Phoenix.PubSub.PG2]},
       Absinthe.Phoenix.TestEndpoint,
-      {Absinthe.Subscription, Absinthe.Phoenix.TestEndpoint}
+      {Subscription, TestEndpoint}
     ]
 
     {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
@@ -162,19 +165,44 @@ defmodule Absinthe.PhoenixTest do
 
     assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
 
-    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 1, ordinal: "ordinal_topic")
+    Subscription.publish(TestEndpoint, 1, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
     expected = %{result: %{data: %{"ordinal" => 1}}, subscriptionId: subscription_ref}
     assert expected == push
 
-    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 0, ordinal: "ordinal_topic")
+    Subscription.publish(TestEndpoint, 0, ordinal: "ordinal_topic")
+    refute_push("subscription:data", _)
     # This message should not generate a notification because it has a lower ordinal
 
-    Absinthe.Subscription.publish(Absinthe.Phoenix.TestEndpoint, 2, ordinal: "ordinal_topic")
+    Subscription.publish(TestEndpoint, 2, ordinal: "ordinal_topic")
 
     assert_push("subscription:data", push)
     expected = %{result: %{data: %{"ordinal" => 2}}, subscriptionId: subscription_ref}
+    assert expected == push
+  end
+
+  test "subscription with ordinal and compare fun", %{socket: socket} do
+    ref = push(socket, "doc", %{"query" => "subscription { ordinalWithCompare }"})
+
+    assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
+
+    Subscription.publish(TestEndpoint, 1, ordinal_with_compare: "ordinal_with_compare_topic")
+
+    assert_push("subscription:data", push)
+    expected = %{result: %{data: %{"ordinalWithCompare" => 1}}, subscriptionId: subscription_ref}
+    assert expected == push
+
+    Subscription.publish(TestEndpoint, 2, ordinal_with_compare: "ordinal_with_compare_topic")
+    refute_push("subscription:data", _)
+    # This message should not generate a notification because the compare function is old > new
+
+    Subscription.publish(TestEndpoint, 2, ordinal_with_compare: "ordinal_with_compare_topic")
+    # This message should generate a notification because the compare function result
+    # adds 1 to the ordinal
+
+    assert_push("subscription:data", push)
+    expected = %{result: %{data: %{"ordinalWithCompare" => 2}}, subscriptionId: subscription_ref}
     assert expected == push
   end
 

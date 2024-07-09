@@ -113,5 +113,14 @@ defmodule Schema do
         {:ok, topic: "ordinal_topic", ordinal: fn value -> value end}
       end
     end
+
+    field :ordinal_with_compare, :integer do
+      config fn _, _ ->
+        {:ok,
+         topic: "ordinal_with_compare_topic",
+         ordinal: fn value -> value end,
+         ordinal_compare: fn old, new -> {is_nil(old) || old > new, new + 1} end}
+      end
+    end
   end
 end

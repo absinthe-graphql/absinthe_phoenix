@@ -89,22 +89,23 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   def handle_info(
-        %Phoenix.Socket.Broadcast{payload: %{result: %{ordinal: ordinal}}} = msg,
+        %Phoenix.Socket.Broadcast{
+          payload: %{result: %{ordinal: ordinal, ordinal_compare_fun: ordinal_compare_fun}}
+        } = msg,
         socket
       )
       when not is_nil(ordinal) do
     absinthe_assigns = Map.get(socket.assigns, :absinthe, %{})
     last_ordinal = absinthe_assigns[:subscription_ordinals][msg.topic]
 
-    cond do
-      last_ordinal == nil or last_ordinal < ordinal ->
-        send_msg(msg, socket)
-        socket = update_ordinal(socket, msg.topic, ordinal)
-        {:noreply, socket}
+    {should_send, new_ordinal} = ordinal_compare_fun.(last_ordinal, ordinal)
 
-      true ->
-        {:noreply, socket}
+    if should_send do
+      send_msg(msg, socket)
     end
+
+    socket = update_ordinal(socket, msg.topic, new_ordinal)
+    {:noreply, socket}
   end
 
   def handle_info(msg, socket) do
@@ -114,6 +115,7 @@ defmodule Absinthe.Phoenix.Channel do
 
   defp send_msg(msg, socket) do
     {_ordinal, msg} = pop_in(msg.payload.result[:ordinal])
+    {_ordinal_compare_fun, msg} = pop_in(msg.payload.result[:ordinal_compare_fun])
     encoded_msg = socket.serializer.fastlane!(msg)
     send(socket.transport_pid, encoded_msg)
   end
