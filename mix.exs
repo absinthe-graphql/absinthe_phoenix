@@ -2,7 +2,7 @@ defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/absinthe-graphql/absinthe_phoenix"
-  @version "2.0.2"
+  @version "2.0.3"
 
   def project do
     [
@@ -56,7 +56,7 @@ defmodule Absinthe.Phoenix.Mixfile do
       {:decimal, "~> 1.0 or ~> 2.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_pubsub, "~> 2.0"},
-      {:phoenix_html, "~> 2.13 or ~> 3.0", optional: true},
+      {:phoenix_html, "~> 2.13 or ~> 3.0 or ~> 4.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]}
     ]
