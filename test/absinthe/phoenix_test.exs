@@ -176,6 +176,18 @@ defmodule Absinthe.PhoenixTest do
     assert reply == %{errors: [%{locations: [%{column: 15, line: 1}], message: "unauthorized"}]}
   end
 
+  @tag :skip #TODO: update when absinthe's version is >= 1.8
+  test "config functions can return errors when returning map", %{socket: socket} do
+    ref =
+      push(socket, "doc", %{
+        "query" => "subscription {errorsMap { __typename }}"
+      })
+
+    assert_reply(ref, :error, reply)
+
+    assert reply == %{errors: [%{locations: [%{column: 15, line: 1}], message: "unauthorized", extensions: %{code: "UNAUTHORIZED"}}]}
+  end
+
   test "can't do multiple fields on a subscription root", %{socket: socket} do
     ref =
       push(socket, "doc", %{
