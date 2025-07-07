@@ -149,7 +149,7 @@ defmodule Absinthe.Phoenix.Channel do
         pubsub_subscribe(topic, socket)
         socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
 
-        handle_subscription_continuation(continuations, topic, socket)
+        {:ok, socket} = handle_subscription_continuation(continuations, topic, socket)
 
         {:noreply, socket}
 
@@ -250,23 +250,30 @@ defmodule Absinthe.Phoenix.Channel do
   defp handle_subscription_continuation(continuations, topic, socket) do
     case Absinthe.Pipeline.continue(continuations) do
       {:ok, %{result: :no_more_results}, _phases} ->
-        :ok
+        {:ok, socket}
 
       {:ok, %{result: result}, _phases} ->
-        socket = push_subscription_item(result.data, topic, socket)
+        socket = push_subscription_item(result, topic, socket)
 
         case result[:continuations] do
-          nil -> :ok
+          nil -> {:ok, socket}
           c -> handle_subscription_continuation(c, topic, socket)
         end
     end
   end
 
-  defp push_subscription_item(data, topic, socket) do
+  defp push_subscription_item(result, topic, socket) do
     msg = %Phoenix.Socket.Broadcast{
       topic: topic,
       event: "subscription:data",
-      payload: %{result: %{data: data}, subscriptionId: topic}
+      payload: %{
+        result: %{
+          data: result.data,
+          ordinal: result[:ordinal],
+          ordinal_compare_fun: result[:ordinal_compare_fun]
+        },
+        subscriptionId: topic
+      }
     }
 
     {:noreply, socket} = handle_info(msg, socket)

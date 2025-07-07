@@ -122,5 +122,16 @@ defmodule Schema do
          ordinal_compare: fn old, new -> {is_nil(old) || old > new, new + 1} end}
       end
     end
+
+    field :ordinal_with_prime, :integer do
+      config fn _, _ ->
+        {:ok,
+         topic: "ordinal_with_prime_topic",
+         prime: fn _ ->
+           {:ok, [3, 2]}
+         end,
+         ordinal: fn value -> value end}
+      end
+    end
   end
 end

@@ -182,6 +182,27 @@ defmodule Absinthe.PhoenixTest do
     assert expected == push
   end
 
+  test "subscription with priming and ordinal", %{socket: socket} do
+    ref = push(socket, "doc", %{"query" => "subscription { ordinalWithPrime }"})
+
+    assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
+
+    assert_push("subscription:data", push)
+    expected = %{result: %{data: %{"ordinalWithPrime" => 3}}, subscriptionId: subscription_ref}
+    assert expected == push
+
+    refute_push("subscription:data", _)
+
+    Subscription.publish(TestEndpoint, 1, ordinal_with_prime: "ordinal_with_prime_topic")
+    refute_push("subscription:data", _)
+
+    Subscription.publish(TestEndpoint, 4, ordinal_with_prime: "ordinal_with_prime_topic")
+
+    assert_push("subscription:data", push)
+    expected = %{result: %{data: %{"ordinalWithPrime" => 4}}, subscriptionId: subscription_ref}
+    assert expected == push
+  end
+
   test "subscription with ordinal and compare fun", %{socket: socket} do
     ref = push(socket, "doc", %{"query" => "subscription { ordinalWithCompare }"})
 
