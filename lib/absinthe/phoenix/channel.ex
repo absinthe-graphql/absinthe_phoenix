@@ -114,9 +114,18 @@ defmodule Absinthe.Phoenix.Channel do
   end
 
   defp send_msg(msg, socket) do
-    {_ordinal, msg} = pop_in(msg.payload.result[:ordinal])
-    {_ordinal_compare_fun, msg} = pop_in(msg.payload.result[:ordinal_compare_fun])
-    encoded_msg = socket.serializer.fastlane!(msg)
+    stripped_msg =
+      case msg do
+        %Phoenix.Socket.Broadcast{payload: %{result: _}} ->
+          {_ordinal, msg} = pop_in(msg.payload.result[:ordinal])
+          {_ordinal_compare_fun, msg} = pop_in(msg.payload.result[:ordinal_compare_fun])
+          msg
+
+        _ ->
+          msg
+      end
+
+    encoded_msg = socket.serializer.fastlane!(stripped_msg)
     send(socket.transport_pid, encoded_msg)
   end
 
