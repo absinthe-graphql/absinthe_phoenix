@@ -15,16 +15,16 @@ jobs:
       matrix:
         include:
           - pair:
-              elixir: "1.11.x"
-              otp: "22.x"
-          - pair:
-              elixir: "1.15.x"
-              otp: "26.x"
+              elixir: "1.18"
+              otp: "28"
             lint: true
+          - pair:
+              elixir: "1.15"
+              otp: "24"
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
 
     - name: Set up Elixir
       uses: erlef/setup-beam@v1
@@ -33,7 +33,7 @@ jobs:
         otp-version: ${{ matrix.pair.otp }}
 
     - name: Restore deps cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           deps
