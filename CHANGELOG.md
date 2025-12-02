@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.4 - 2025-12-02
+
+- Add official support for Elixir 1.19 and OTP 28
+- Update dependencies
+- Refactor CI
+- Automate release creation and package publishing
+
 ## v2.0.3 - 2024-04-02
 
 - Add official support for Elixir 1.15 and OTP 26
