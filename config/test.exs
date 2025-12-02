@@ -1,6 +1,6 @@
 import Config
 
-config :logger, level: :warn
+config :logger, level: :warning
 
 config :absinthe_phoenix, Absinthe.Phoenix.TestEndpoint,
   url: [host: "localhost"],
