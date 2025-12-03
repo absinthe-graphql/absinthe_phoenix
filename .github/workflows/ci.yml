@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  setup:
+    name: Setup for Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
+    runs-on: ubuntu-latest
+    strategy: &strategy
+      matrix:
+        elixir: ["1.15", "1.16", "1.17", "1.18", "1.19"]
+        otp: ["25", "26", "27", "28"]
+        # see https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp
+        exclude:
+          [
+            { elixir: 1.15, otp: 27 },
+            { elixir: 1.15, otp: 28 },
+            { elixir: 1.16, otp: 27 },
+            { elixir: 1.16, otp: 28 },
+            { elixir: 1.17, otp: 28 },
+            { elixir: 1.19, otp: 25 },
+          ]
+    steps:
+      - &checkout
+        name: Checkout
+        uses: actions/checkout@v4
+
+      - &setup
+        name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+
+      - &cache
+        name: Restore deps cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}
+
+      - name: Install package dependencies
+        run: mix deps.get
+
+      - name: Compile dependencies
+        run: mix compile
+        env:
+          MIX_ENV: ${{ inputs.mix_env }}
+
+  test:
+    name: Test on Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
+    runs-on: ubuntu-latest
+    needs: [setup]
+    strategy: *strategy
+    steps:
+      - *checkout
+      - *setup
+      - *cache
+      - name: Run unit tests
+        run: mix test
+
+  dependencies:
+    name: Check dependencies
+    runs-on: ubuntu-latest
+    needs: [setup]
+    strategy:
+      matrix: { elixir: ["1.19"], otp: ["28"] }
+    steps:
+      - *checkout
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with: { elixir-version: 1.19, otp-version: 28 }
+      - *cache
+      - name: Check for unused dependencies
+        run: mix deps.unlock --check-unused
+      - name: Check for retired dependencies
+        run: mix hex.audit
+      - name: Check for dependencies for known vulnerabilities
+        run: mix hex.audit
+
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    needs: [setup]
+    strategy:
+      matrix: { elixir: ["1.19"], otp: ["28"] }
+    steps:
+      - *checkout
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with: { elixir-version: 1.19, otp-version: 28 }
+      - *cache
+      - name: Check code format
+        run: mix format --check-formatted
+
+  release:
+    name: Create or Update Release PR
+    runs-on: ubuntu-latest
+    needs: [test, dependencies, format]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          release-type: elixir

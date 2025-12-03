@@ -1,0 +1,42 @@
+name: Publish Hex Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The git tag for the release to publish"
+        type: string
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: 28
+          elixir-version: 1.19
+
+      - name: Restore deps cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: deps-${{ runner.os }}-28-1.19-${{ hashFiles('**/mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            deps-${{ runner.os }}-28.1.19-${{ hashFiles('**/mix.lock') }}
+            deps-${{ runner.os }}-28-1.19-${{ matrix.otp }}-${{ matrix.elixir }}
+
+      - name: Publish to hex.pm
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+        run: mix hex.publish --yes
