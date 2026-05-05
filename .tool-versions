@@ -1,2 +1,12 @@
-elixir 1.19.4-otp-28
-erlang 28.2
+# Note: If you change any versions, you must update the versions in the following files:
+# - .circleci/config.yml
+# - .devcontainer/docker-compose.yml
+# - production/Dockerfile.integration
+# - production/Dockerfile.release
+# - production/Dockerfile.runtime
+# - .tool-versions (you are here)
+# Note: If you change the Node.js version, you must also update the version in the following files:
+# - .devcontainer/devcontainer.json
+elixir 1.18.4-otp-26
+erlang 26.2.5.10
+nodejs 24.12.0
