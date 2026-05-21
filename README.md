@@ -66,12 +66,19 @@ line:
 [
   # other children ...
   MyAppWeb.Endpoint, # this line should already exist
-  {Absinthe.Subscription, MyAppWeb.Endpoint}, # add this line
+  {Absinthe.Subscription, pubsub: MyAppWeb.Endpoint}, # add this line
   # other children ...
 ]
 ```
 
 Where `MyAppWeb.Endpoint` is the name of your application's phoenix endpoint.
+
+Other options include:
+
+* pool_size - Number of processes created to handle incoming messages concurrently on the current node. Default: `System.schedulers_online() * 2`
+* compress_registry? - Whether the underlying registry should be compressed. Default: `true`
+* async - Whether the each process above should handle the message in-process (`false`) or create a new process to do so (`true`).  Default: `true`
+* registry_partition_strategy - Partition the registry by `:pid` or by `:key`. `:key` is only supported in Elixir 1.19 and up. Default: `:pid`
 
 In your `MyAppWeb.Endpoint` module add:
 

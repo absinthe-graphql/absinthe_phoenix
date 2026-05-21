@@ -2,13 +2,13 @@ defmodule Absinthe.Phoenix.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/absinthe-graphql/absinthe_phoenix"
-  @version "2.0.3"
+  @version "2.0.4"
 
   def project do
     [
       app: :absinthe_phoenix,
       version: @version,
-      elixir: "~> 1.11",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       package: package(),

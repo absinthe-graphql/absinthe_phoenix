@@ -60,7 +60,7 @@ defmodule Absinthe.Phoenix.ControllerTest do
   end
 
   defmodule Controller do
-    use Phoenix.Controller
+    use Phoenix.Controller, formats: [:json]
 
     use Absinthe.Phoenix.Controller,
       schema: Absinthe.Phoenix.ControllerTest.Schema,
