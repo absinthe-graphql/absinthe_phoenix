@@ -82,8 +82,20 @@ defmodule Absinthe.Phoenix.Controller.Result do
     end
   end
 
-  # List
-  defp data(%{values: values}, errors), do: list_data(values, errors)
+  # List. Newer Absinthe collapses a nullable scalar/enum list into a single
+  # Blueprint.Result.LeafList node holding the raw values, instead of a
+  # Result.Leaf per element. Detect it structurally with is_struct/2, which takes
+  # the module as a plain atom — so this still compiles against older Absinthe
+  # versions that don't define the struct (there the branch is simply never
+  # taken). LeafList values are already raw/unserialized, consistent with the
+  # Leaf clause above that deliberately does not serialize scalars.
+  defp data(%{values: values} = node, errors) do
+    if is_struct(node, Blueprint.Result.LeafList) do
+      {values, errors}
+    else
+      list_data(values, errors)
+    end
+  end
 
   defp list_data(fields, errors, acc \\ [])
   defp list_data([], errors, acc), do: {:lists.reverse(acc), errors}
