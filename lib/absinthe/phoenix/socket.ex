@@ -49,6 +49,7 @@ defmodule Absinthe.Phoenix.Socket do
 
     schema = Keyword.get(opts, :schema)
     pipeline = Keyword.get(opts, :pipeline)
+    presence_config = Keyword.get(opts, :presence_config)
     gc_interval = Keyword.get(opts, :gc_interval)
 
     quote do
@@ -58,6 +59,7 @@ defmodule Absinthe.Phoenix.Socket do
         assigns: %{
           __absinthe_schema__: unquote(schema),
           __absinthe_pipeline__: unquote(pipeline),
+          __absinthe_presence_config__: unquote(presence_config),
           __absinthe_gc_interval__: unquote(gc_interval)
         }
       )
