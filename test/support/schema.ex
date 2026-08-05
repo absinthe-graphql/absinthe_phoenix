@@ -97,5 +97,11 @@ defmodule Schema do
         {:error, "unauthorized"}
       end
     end
+
+    field :errors_map, :comment do
+      config fn _, _ ->
+        {:error, %{message: "unauthorized", extensions: %{code: "UNAUTHORIZED"}}}
+      end
+    end
   end
 end
