@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.5](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.3...v2.0.4) (2026-05-05)
+
+* Support Decimal 3.0
+
 ## [2.0.4](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.3...v2.0.4) (2025-12-03)
 
 ### Bug Fixes
