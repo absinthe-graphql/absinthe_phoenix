@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.5](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.4...v2.0.5) (2026-10-27)
+
+
+### Bug Fixes
+
+* choose the subscribe option at compile time ([1196d4d](https://github.com/absinthe-graphql/absinthe_phoenix/commit/1196d4d842f3a6a4013ea40cf8e7afd3162a9308))
+* deliver subscription pushes on Phoenix 1.8.16 ([9caeaf6](https://github.com/absinthe-graphql/absinthe_phoenix/commit/9caeaf670e0dac345bc11841a24974e67db7e533))
+* deliver subscription pushes on Phoenix 1.8.16 ([a599214](https://github.com/absinthe-graphql/absinthe_phoenix/commit/a59921464a10d402fcd15c084407e5e292d3a80a)), closes [#113](https://github.com/absinthe-graphql/absinthe_phoenix/issues/113)
+
 ## [2.0.6](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.5...v2.0.6) (2026-10-26)
 
 ### Bug Fixes
