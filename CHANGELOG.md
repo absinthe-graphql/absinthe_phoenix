@@ -6,7 +6,7 @@
 
 * Deliver subscription pushes on Phoenix 1.8.16, which no longer handles fastlane subscription metadata ([#114](https://github.com/absinthe-graphql/absinthe_phoenix/pull/114)), closes [#113](https://github.com/absinthe-graphql/absinthe_phoenix/issues/113)
 
-## [2.0.5](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.3...v2.0.4) (2026-05-05)
+## [2.0.5](https://github.com/absinthe-graphql/absinthe_phoenix/compare/v2.0.4...v2.0.5) (2026-05-05)
 
 * Support Decimal 3.0
 
