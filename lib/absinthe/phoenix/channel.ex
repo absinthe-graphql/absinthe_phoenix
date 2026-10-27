@@ -125,11 +125,13 @@ defmodule Absinthe.Phoenix.Channel do
 
   # Phoenix 1.8.16 moved channels to `Phoenix.PubSub.Sender` and no longer
   # handles `{:fastlane, ...}` metadata, so use the sender when it exists.
-  defp subscribe_opts(transport_pid, serializer) do
-    if Code.ensure_loaded?(Phoenix.Channel.Server) and
-         function_exported?(Phoenix.Channel.Server, :send, 4) do
+  if Code.ensure_loaded?(Phoenix.Channel.Server) and
+       function_exported?(Phoenix.Channel.Server, :send, 4) do
+    defp subscribe_opts(transport_pid, serializer) do
       [sender: {Phoenix.Channel.Server, {transport_pid, serializer, []}}]
-    else
+    end
+  else
+    defp subscribe_opts(transport_pid, serializer) do
       [metadata: {:fastlane, transport_pid, serializer, []}]
     end
   end
