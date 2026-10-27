@@ -107,6 +107,42 @@ defmodule Absinthe.PhoenixTest do
     assert expected == push
   end
 
+  test "published subscription data is pushed to the client", %{socket: socket} do
+    ref =
+      push(socket, "doc", %{
+        "query" => "subscription {commentAdded { contents }}"
+      })
+
+    assert_reply(ref, :ok, %{subscriptionId: subscription_ref})
+
+    Absinthe.Subscription.publish(
+      Absinthe.Phoenix.TestEndpoint,
+      %{contents: "published"},
+      comment_added: ""
+    )
+
+    assert_push("subscription:data", push)
+
+    expected = %{
+      result: %{data: %{"commentAdded" => %{"contents" => "published"}}},
+      subscriptionId: subscription_ref
+    }
+
+    assert expected == push
+  end
+
+  test "subscription data sent to the channel process is still pushed", %{socket: socket} do
+    broadcast = %Phoenix.Socket.Broadcast{
+      topic: "__absinthe__:doc:test",
+      event: "subscription:data",
+      payload: %{result: %{data: %{}}, subscriptionId: "__absinthe__:doc:test"}
+    }
+
+    send(socket.channel_pid, broadcast)
+
+    assert_push("subscription:data", %{subscriptionId: "__absinthe__:doc:test"})
+  end
+
   test "subscriptions that raise errors do not cause problems for mutations", %{socket: socket} do
     ref =
       push(socket, "doc", %{
