@@ -104,8 +104,7 @@ defmodule Absinthe.Phoenix.Channel do
           Phoenix.PubSub.subscribe(
             pubsub_server,
             topic,
-            metadata: {:fastlane, transport_pid, serializer, []},
-            link: true
+            subscribe_opts(transport_pid, serializer)
           )
 
         socket = Absinthe.Phoenix.Socket.put_options(socket, context: context)
@@ -121,6 +120,17 @@ defmodule Absinthe.Phoenix.Channel do
 
       {:error, reply} ->
         {reply, socket}
+    end
+  end
+
+  # Phoenix 1.8.16 moved channels to `Phoenix.PubSub.Sender` and no longer
+  # handles `{:fastlane, ...}` metadata, so use the sender when it exists.
+  defp subscribe_opts(transport_pid, serializer) do
+    if Code.ensure_loaded?(Phoenix.Channel.Server) and
+         function_exported?(Phoenix.Channel.Server, :send, 4) do
+      [sender: {Phoenix.Channel.Server, {transport_pid, serializer, []}}]
+    else
+      [metadata: {:fastlane, transport_pid, serializer, []}]
     end
   end
 
@@ -153,6 +163,13 @@ defmodule Absinthe.Phoenix.Channel do
     :erlang.garbage_collect()
     :erlang.garbage_collect(socket.transport_pid)
     Process.send_after(self(), :gc, socket.assigns.absinthe.gc_interval)
+    {:noreply, socket}
+  end
+
+  # Subscription data normally bypasses the channel and goes straight to the
+  # transport. If it does reach the channel, push it rather than drop it.
+  def handle_info(%Phoenix.Socket.Broadcast{event: "subscription:data"} = broadcast, socket) do
+    send(socket.transport_pid, socket.serializer.fastlane!(broadcast))
     {:noreply, socket}
   end
 
